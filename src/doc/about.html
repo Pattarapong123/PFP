@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- 🔹 SEO -->
+  <title>เกี่ยวกับเรา • PFP ENGINEERING</title>
+  <meta name="description" content="เกี่ยวกับ PFP ENGINEERING ทีมวิศวกรไอทีที่เชี่ยวชาญระบบเครือข่าย เซิร์ฟเวอร์ คลาวด์ และซอฟต์แวร์สำหรับธุรกิจ" />
+  <meta name="keywords" content="PFP, Engineering, เกี่ยวกับเรา, บริษัทไอที, ระบบเครือข่าย, เซิร์ฟเวอร์, คลาวด์" />
+  <meta name="author" content="PFP ENGINEERING" />
+  <link rel="canonical" href="./about.html" />
+
+  <!-- 🔹 Open Graph -->
+  <meta property="og:title" content="เกี่ยวกับเรา • PFP ENGINEERING" />
+  <meta property="og:description" content="รู้จักทีม PFP ENGINEERING ผู้เชี่ยวชาญระบบไอทีครบวงจร" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://pattarapong123.github.io/PFP/about.html" />
+  <meta property="og:image" content="https://pattarapong123.github.io/PFP/images/preview.jpg" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="./styles.css" />
+  <!-- ✅ แก้ MIME ให้ถูกต้อง -->
+  <link rel="icon" type="image/jpeg" href="./images/logo2.jpg" />
+
+  <!-- ✅ CSS ของ Header (ยกมาจากที่ใช้หน้าอื่น เพื่อให้หน้าดูเนียนเหมือนกัน) -->
+  <style>
+    .site-header {
+      display:flex; align-items:center; justify-content:space-between;
+      min-height:64px; padding-block:8px; gap:20px;
+    }
+    .brand{ display:flex; align-items:center; gap:10px; text-decoration:none; }
+    .brand-logo{ width:44px; height:44px; object-fit:cover; border-radius:8px; }
+    .nav-left{ display:flex; align-items:center; gap:24px; }
+
+    .main-nav{ display:flex; align-items:center; gap:18px; }
+    .main-nav a{
+      text-decoration:none; padding:8px 10px; border-radius:8px; font-weight:600;
+      color: var(--muted);
+      transition: background .2s ease, color .2s ease;
+    }
+    .main-nav a:hover{ color: var(--text); background: color-mix(in oklab, var(--primary) 10%, transparent); }
+    .main-nav a.active{
+      background: color-mix(in oklab, var(--primary) 14%, transparent);
+      color: var(--primary);
+    }
+
+    .header-actions{ display:flex; align-items:center; gap:12px; margin-left:auto; }
+    .cart-link{ text-decoration:none; padding:6px 12px; border-radius:20px; background: rgba(0,0,0,.05); }
+    .cart-badge{ background:#ff3b30; color:#fff; border-radius:999px; padding:2px 6px; font-size:12px; margin-left:4px; }
+
+    .theme-toggle{
+      display:inline-flex; align-items:center; justify-content:center;
+      height:36px; min-width:36px; padding:0 10px; border-radius:10px;
+      border:1px solid var(--border); background:var(--panel); color:inherit;
+      font-weight:800; cursor:pointer; transition:.2s;
+      order:99;
+    }
+    .theme-toggle:hover{ background: rgba(11,99,246,.06); border-color: rgba(11,99,246,.35); }
+    .theme-toggle:active{ transform: translateY(1px); }
+    .theme-toggle .icon{ font-size:16px; line-height:1; }
+
+    .navbar{
+      background: rgba(255,255,255,.85);
+      backdrop-filter: blur(8px);
+      border-bottom:1px solid var(--border);
+    }
+    :root[data-theme="dark"] .navbar{ background: rgba(21,25,34,.7); }
+  </style>
+</head>
+<body>
+
+  <!-- ===== Header (สแตติก ไม่มี EJS) ===== -->
+  <header class="navbar" role="banner">
+    <div class="container site-header">
+      <div class="nav-left">
+        <a class="brand" href="./index.html" aria-label="หน้าแรก PFP">
+          <img src="./images/logo2.jpg" class="brand-logo" alt="PFP Logo">
+        </a>
+        <nav class="main-nav" role="navigation" aria-label="เมนูหลัก">
+          <a href="./index.html">หน้าแรก</a>
+          <a href="./products.html">สินค้า</a>
+          <a href="./portfolio.html">ผลงาน</a>
+          <a href="./about.html" class="active">เกี่ยวกับเรา</a>
+          <a href="./contact.html">ติดต่อเรา</a>
+        </nav>
+      </div>
+
+      <div class="header-actions">
+        <!-- สำหรับสแตติก เราไม่โชว์ระบบล็อกอิน/ออเดอร์ -->
+        <a href="./cart.html" class="cart-link">ตะกร้า <span class="cart-badge" id="cartCount">0</span></a>
+
+        <button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle theme">
+          <span class="icon" id="themeIcon">🌙</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Theme toggle logic -->
+    <script>
+      (function(){
+        const THEME_KEY = 'pfp.theme';
+        const html = document.documentElement;
+        const btn  = document.getElementById('themeToggle');
+        const icon = document.getElementById('themeIcon');
+        function syncIcon(){
+          const isDark = html.getAttribute('data-theme') === 'dark';
+          icon.textContent = isDark ? '☀️' : '🌙';
+          btn.setAttribute('aria-pressed', String(isDark));
+        }
+        (function init(){
+          const saved = localStorage.getItem(THEME_KEY);
+          if (saved === 'light' || saved === 'dark') {
+            html.setAttribute('data-theme', saved);
+          } else {
+            const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
+            html.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+          }
+          syncIcon();
+        })();
+        btn.addEventListener('click', () => {
+          const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+          html.setAttribute('data-theme', next);
+          localStorage.setItem(THEME_KEY, next);
+          syncIcon();
+        });
+      })();
+    </script>
+  </header>
+  <!-- ===== /Header ===== -->
+
+  <main class="container" style="padding:24px 0;">
+    <!-- Hero/Intro -->
+    <section style="display:grid;grid-template-columns:1.1fr .9fr;gap:24px;align-items:center;">
+      <div>
+        <h1 style="margin:0 0 8px;">เกี่ยวกับเรา</h1>
+        <p style="color:var(--muted);margin:0 0 12px;">
+          PFP ENGINEERING คือทีมวิศวกรและที่ปรึกษาด้านไอทีที่มุ่งสร้างโซลูชันที่ปลอดภัย
+          มีประสิทธิภาพ และส่งมอบได้จริง ครอบคลุมงานระบบเครือข่าย เซิร์ฟเวอร์ คลาวด์
+          และซอฟต์แวร์สำหรับธุรกิจ
+        </p>
+        <p>
+          เราเชื่อในมาตรฐานงานที่ดี การสื่อสารที่โปร่งใส และการซัพพอร์ตที่ต่อเนื่องหลังส่งมอบ
+        </p>
+        <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;">
+          <a href="./products.html" class="btn">บริการของเรา</a>
+          <a href="./contact.html" class="btn" style="background:transparent;color:var(--primary);border:1px solid var(--primary);">
+            ติดต่อทีมงาน
+          </a>
+        </div>
+      </div>
+      <div>
+        <img src="./images/logo1.jpg" alt="ทีมงาน PFP ENGINEERING"
+             style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:var(--radius);box-shadow:var(--shadow);">
+      </div>
+    </section>
+
+    <!-- Values -->
+    <section style="margin-top:28px;">
+      <h2>สิ่งที่เราให้ความสำคัญ</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>คุณภาพงาน</h3>
+          <p>ออกแบบและทดสอบอย่างเป็นระบบ เอกสารครบ ตรวจสอบได้</p>
+        </div>
+        <div class="card">
+          <h3>ความปลอดภัย</h3>
+          <p>แนวทาง Security by Design ครอบคลุมตั้งแต่โครงสร้างจนถึงการปฏิบัติ</p>
+        </div>
+        <div class="card">
+          <h3>ความรวดเร็ว</h3>
+          <p>วางแผนงานชัดเจน ส่งมอบตามกำหนด พร้อมช่องทางซัพพอร์ต</p>
+        </div>
+        <div class="card">
+          <h3>ความคุ้มค่า</h3>
+          <p>แนะนำโซลูชันที่เหมาะสมกับงบและเป้าหมายธุรกิจของลูกค้า</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats / Highlights -->
+    <section style="margin-top:28px;">
+      <div class="grid">
+        <div class="card">
+          <span class="badge">ประสบการณ์</span>
+          <h3 style="margin-top:6px;">10+ ปี</h3>
+          <p>ทีมงานรวมประสบการณ์ในงานโครงสร้างพื้นฐานและซอฟต์แวร์</p>
+        </div>
+        <div class="card">
+          <span class="badge">โปรเจกต์</span>
+          <h3 style="margin-top:6px;">100+ โครงการ</h3>
+          <p>ตั้งแต่ SME จนถึงองค์กรขนาดใหญ่</p>
+        </div>
+        <div class="card">
+          <span class="badge">การซัพพอร์ต</span>
+          <h3 style="margin-top:6px;">SLA ชัดเจน</h3>
+          <p>มีแผนบำรุงรักษาและช่องทางติดต่อฉุกเฉิน</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== Footer + Contact Widget (เวอร์ชันสแตติก) ===== -->
+  <footer class="container">
+    <p>© <span id="year"></span> PFP ENGINEERING</p>
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+
+  <style>
+    :root{
+      --cw-primary: var(--primary, #0aaee4);
+      --cw-panel:   var(--panel, #fff);
+      --cw-text:    var(--text, #111827);
+      --cw-muted:   var(--muted, #6b7280);
+      --cw-border:  var(--border, #e5e7eb);
+    }
+    .cw{ position:fixed; right:16px; bottom:16px; z-index:1100; font-family:inherit; }
+    .cw *{ box-sizing:border-box; }
+    .cw-btn{
+      width:56px; height:56px; border-radius:50%;
+      display:inline-flex; align-items:center; justify-content:center;
+      color:#fff; background:var(--cw-primary);
+      box-shadow: 0 12px 30px rgba(0,0,0,.22);
+      border:1px solid color-mix(in oklab, var(--cw-primary) 60%, #0000);
+      cursor:pointer; transition:.18s transform, .18s box-shadow, .18s background;
+    }
+    .cw-btn:hover{ transform:translateY(-2px); box-shadow:0 16px 36px rgba(0,0,0,.28); }
+    .cw-btn:active{ transform:translateY(-1px) scale(.98); }
+    .cw-hint{
+      position:absolute; right:70px; bottom:8px;
+      background:var(--cw-panel); color:var(--cw-text);
+      border:1px solid var(--cw-border); border-radius:18px;
+      padding:10px 14px; box-shadow:0 10px 24px rgba(16,24,40,.12);
+      white-space:nowrap; max-width:60vw;
+      transform:translateY(6px); opacity:0; pointer-events:none;
+      transition:.28s transform, .28s opacity;
+    }
+    .cw-hint::after{
+      content:""; position:absolute; right:-8px; bottom:12px;
+      border:8px solid transparent; border-left-color:var(--cw-panel);
+      filter: drop-shadow(0 0 0 var(--cw-border));
+    }
+    .cw.show-hint .cw-hint{ transform:none; opacity:1; }
+    .cw-menu{
+      position:absolute; right:0; bottom:70px; display:grid; gap:10px;
+      transform: translateY(8px) scale(.98); transform-origin: 100% 100%;
+      opacity:0; pointer-events:none; transition:.18s transform,.18s opacity;
+    }
+    .cw.is-open .cw-menu{ transform:none; opacity:1; pointer-events:auto; }
+    .cw-item{
+      display:grid; grid-template-columns: 1fr auto; align-items:center; gap:10px;
+      background:var(--cw-panel); color:var(--cw-text);
+      border:1px solid var(--cw-border); border-radius:14px;
+      padding:10px 12px; min-width:230px;
+      box-shadow:0 10px 24px rgba(16,24,40,.10);
+      text-decoration:none; font-weight:700;
+      transition:.18s transform,.18s box-shadow,.18s border-color,.18s background;
+    }
+    .cw-item:hover{
+      transform: translateY(-2px);
+      border-color: color-mix(in oklab, var(--cw-primary) 26%, var(--cw-border));
+      box-shadow:0 16px 34px rgba(16,24,40,.16);
+    }
+    .cw-item .meta{ font-weight:600; font-size:12px; color:var(--cw-muted); }
+    .cw-icon{
+      width:42px; height:42px; border-radius:50%;
+      display:inline-flex; align-items:center; justify-content:center;
+      color:#fff; box-shadow: inset 0 0 0 1px #00000014;
+    }
+    .cw-icon.line{  background:#06C755; }
+    .cw-icon.mail{  background:#b86a00; }
+    .cw-icon.phone{ background:#0ea5a5; }
+    .cw-badge{
+      justify-self:end; color:var(--cw-muted); font-size:11px; font-weight:700;
+      background: color-mix(in oklab, var(--cw-primary) 8%, transparent);
+      border:1px solid var(--cw-border); border-radius:999px; padding:4px 8px;
+    }
+    @media (max-width:520px){
+      .cw{ right:12px; bottom:12px; }
+      .cw-item{ min-width: 210px; }
+    }
+    @media (prefers-color-scheme: dark){
+      .cw-hint{ box-shadow:0 10px 26px rgba(0,0,0,.35); }
+      .cw-item{ box-shadow:0 10px 26px rgba(0,0,0,.28); }
+    }
+  </style>
+
+  <div id="contactWidget"
+      class="cw"
+      data-line="https://line.me/R/ti/p/~pfpengineering"
+      data-form="./contact.html"
+      data-phone="099-135-1328"
+      data-mail="pfp.service01@gmail.com"
+      data-badge="Powered by PFP">
+
+    <div class="cw-hint">ติดต่อเราที่นี่ได้เลยค่ะ</div>
+    <div class="cw-menu" role="menu" aria-label="เมนูติดต่อ"></div>
+
+    <button class="cw-btn" type="button" aria-expanded="false" aria-controls="cwMenu" aria-label="ติดต่อเรา">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M21 12a8 8 0 0 1-8 8H8l-5 3V12a8 8 0 0 1 8-8h2a8 8 0 0 1 8 8Z"
+              stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+
+  <script>
+    (function(){
+      var root = document.getElementById('contactWidget');
+      if(!root) return;
+
+      var cfg = {
+        line:  root.dataset.line  || '',
+        form:  root.dataset.form  || '',
+        phone: root.dataset.phone || '',
+        mail:  root.dataset.mail  || '',
+        badge: root.dataset.badge || ''
+      };
+
+      var menu = root.querySelector('.cw-menu');
+      function iconSVG(type){
+        if(type==='line')  return '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.5 3h-15A2.5 2.5 0 0 0 2 5.5v8A2.5 2.5 0 0 0 4.5 16H7v4l5.2-4H19.5A2.5 2.5 0 0 0 22 13.5v-8A2.5 2.5 0 0 0 19.5 3Z"/><path d="M4 4l8 7 8-7"/></svg>';
+        if(type==='mail')  return '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm0 0 8 7 8-7"/></svg>';
+        if(type==='phone') return '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.8 19.8 0 0 1 3.11 5.18 2 2 0 0 1 5.09 3h3a2 2 0 0 1 2 1.72c.12.9.3 1.78.55 2.63a2 2 0 0 1-.45 2.11L9 11a16 16 0 0 0 6 6l1.54-1.19a2 2 0 0 1 2.11-.45c.85.25 1.73.43 2.63.55A2 2 0 0 1 22 16.92Z"/></svg>';
+        return '';
+      }
+      function addItem({href,label,meta,cls,target}){
+        var a = document.createElement('a');
+        a.className = 'cw-item';
+        a.href = href; a.target = target || '_blank'; a.rel = 'noopener';
+        a.setAttribute('role','menuitem');
+        a.innerHTML =
+          '<div><div>'+label+'</div>' +
+            (meta ? '<div class="meta">'+meta+'</div>' : '') +
+          '</div>' +
+          '<span class="cw-icon '+cls+'">'+iconSVG(cls.replace('icon-',''))+'</span>';
+        menu.appendChild(a);
+      }
+
+      if(cfg.line)  addItem({href: cfg.line, label:'พูดคุยผ่าน Line', meta:'ตอบไวในเวลาทำการ', cls:'line'});
+      if(cfg.form)  addItem({href: cfg.form, label:'ฝากข้อมูลเพิ่มเติม', meta:'เราติดต่อกลับโดยเร็ว', cls:'mail', target:'_self'});
+      if(cfg.phone){
+        var tel = cfg.phone.replace(/\s+/g,'');
+        addItem({href:'tel:'+tel, label:'โทรหาเรา', meta: cfg.phone, cls:'phone', target:'_self'});
+      }
+      if(cfg.mail)  addItem({href:'mailto:'+cfg.mail, label:'อีเมลหาเรา', meta: cfg.mail, cls:'mail', target:'_self'});
+
+      if(cfg.badge){
+        var badge = document.createElement('div');
+        badge.className = 'cw-badge';
+        badge.textContent = cfg.badge;
+        menu.appendChild(badge);
+      }
+
+      var btn  = root.querySelector('.cw-btn');
+      function open(){ root.classList.add('is-open'); btn.setAttribute('aria-expanded','true'); }
+      function close(){ root.classList.remove('is-open'); btn.setAttribute('aria-expanded','false'); }
+      btn.addEventListener('click', function(){
+        root.classList.contains('is-open') ? close() : open();
+      });
+      document.addEventListener('click', function(e){ if(!root.contains(e.target)) close(); });
+      document.addEventListener('keydown', function(e){ if(e.key === 'Escape') close(); });
+
+      try{
+        var key='cw_hint_at';
+        var last = parseInt(localStorage.getItem(key)||'0',10);
+        var now  = Date.now();
+        if(!last || now-last > 3*24*60*60*1000){
+          root.classList.add('show-hint');
+          setTimeout(function(){ root.classList.remove('show-hint'); }, 4200);
+          localStorage.setItem(key, String(now));
+        }
+      }catch(_e){}
+    })();
+  </script>
+  <!-- ===== /Footer + Contact Widget ===== -->
+
+</body>
+</html>

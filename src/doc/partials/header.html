@@ -9,18 +9,36 @@
   <meta name="keywords" content="PFP, บริษัท, สินค้า, portfolio, demo, ผลงาน">
   <meta name="author" content="PFP Company">
 
-  <!-- 🔹 Open Graph (เวลาแชร์ลิงก์บนโซเชียล) -->
+  <!-- 🔹 Open Graph -->
   <meta property="og:title" content="PFP Company" />
   <meta property="og:description" content="เว็บไซต์บริษัท PFP แสดงผลงานและสินค้า (Demo)">
+  <!-- ❗️แก้ให้ตรงกับ repo จริงของคุณ -->
   <meta property="og:image" content="https://pattarapong123.github.io/PFP/images/preview.jpg" />
   <meta property="og:url" content="https://pattarapong123.github.io/PFP/" />
   <meta property="og:type" content="website" />
 
-  <!-- 🔹 Dynamic title -->
-  <title><%= title || "PFP Company" %></title>
+  <!-- Title (แบบคงที่สำหรับ static) -->
+  <title>PFP Company</title>
+
+  <!-- (ถ้ามีไฟล์ styles.css ของคุณ ให้ลิงก์ด้วย)
+  <link rel="stylesheet" href="./styles.css" />
+  -->
+  <link rel="icon" type="image/jpeg" href="./images/logo2.jpg" />
 
   <!-- ✅ CSS ของ Header -->
   <style>
+    :root{
+      /* ตัวอย่างตัวแปรเผื่อยังไม่มีไฟล์ styles.css */
+      --primary:#0b63f6; --primary-600:#0a58d1; --primary-700:#0a49aa;
+      --text:#111827; --muted:#6b7280; --border:#e5e7eb; --panel:#fff;
+      --radius:14px; --shadow:0 6px 24px rgba(0,0,0,.08);
+    }
+    [data-theme="dark"]{
+      --text:#e5e7eb; --muted:#9ca3af; --border:#2b2f36; --panel:#141821;
+    }
+
+    .container{ max-width:1100px; margin:0 auto; padding:0 16px; }
+
     .site-header {
       display:flex; align-items:center; justify-content:space-between;
       min-height:64px; padding-block:8px; gap:20px;
@@ -70,70 +88,63 @@
   <div class="container site-header">
     <!-- ซ้าย: โลโก้ + เมนู -->
     <div class="nav-left">
-      <a class="brand" href="/" aria-label="หน้าแรก PFP">
-        <img src="/images/logo2.jpg" class="brand-logo" alt="PFP Logo">
+      <!-- ใช้ลิงก์แบบ relative ให้ทำงานได้ใน /PFP/ ของ GitHub Pages -->
+      <a class="brand" href="./" aria-label="หน้าแรก PFP">
+        <img src="./images/logo2.jpg" class="brand-logo" alt="PFP Logo">
       </a>
       <nav class="main-nav" role="navigation" aria-label="เมนูหลัก">
-        <a href="/" class="<%= path==='/' ? 'active' : '' %>">หน้าแรก</a>
-        <a href="/products" class="<%= (path||'').startsWith('/products') ? 'active' : '' %>">สินค้า</a>
-        <a href="/portfolio" class="<%= (path||'').startsWith('/portfolio') ? 'active' : '' %>">ผลงาน</a>
-        <a href="/about" class="<%= path==='/about' ? 'active' : '' %>">เกี่ยวกับเรา</a>
-        <a href="/contact" class="<%= path==='/contact' ? 'active' : '' %>">ติดต่อเรา</a>
+        <a href="./" class="active">หน้าแรก</a>
+        <a href="./products.html">สินค้า</a>
+        <a href="./portfolio.html">ผลงาน</a>
+        <a href="./about.html">เกี่ยวกับเรา</a>
+        <a href="./contact.html">ติดต่อเรา</a>
       </nav>
     </div>
 
-    <!-- ขวา: ผู้ใช้ + ตะกร้า + สลับธีม -->
+    <!-- ขวา: ตะกร้า + สลับธีม (ตัดส่วน user/EJS ออกเพื่อให้เป็น static) -->
     <div class="header-actions">
-      <% if (user) { %>
-        <span>สวัสดี, <%= user.name || user.email %></span>
-        <a href="/orders/mine" class="<%= (path||'').startsWith('/orders') ? 'active' : '' %>">ออเดอร์ของฉัน</a>
-        <form method="post" action="/auth/logout" style="margin:0;">
-          <button class="btn btn--outline btn--sm">ออกจากระบบ</button>
-        </form>
-      <% } else { %>
-        <a href="/auth/login" class="<%= (path||'').startsWith('/auth/login') ? 'active' : '' %>">เข้าสู่ระบบ</a>
-      <% } %>
-
-      <a href="/cart"
-         class="cart-link <%= (path||'').startsWith('/cart') || (path||'').startsWith('/checkout') ? 'active' : '' %>">
-        ตะกร้า <span class="cart-badge" id="cartCount"><%= cartCount %></span>
+      <a href="./cart.html" class="cart-link">
+        ตะกร้า <span class="cart-badge" id="cartCount">0</span>
       </a>
-
       <button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle theme">
         <span class="icon" id="themeIcon">🌙</span>
       </button>
     </div>
   </div>
-
-  <!-- Theme toggle logic -->
-  <script>
-    (function(){
-      const THEME_KEY = 'pfp.theme';
-      const html = document.documentElement;
-      const btn  = document.getElementById('themeToggle');
-      const icon = document.getElementById('themeIcon');
-
-      function syncIcon(){
-        const isDark = html.getAttribute('data-theme') === 'dark';
-        icon.textContent = isDark ? '☀️' : '🌙';
-        btn.setAttribute('aria-pressed', String(isDark));
-      }
-      (function init(){
-        const saved = localStorage.getItem(THEME_KEY);
-        if (saved === 'light' || saved === 'dark') {
-          html.setAttribute('data-theme', saved);
-        } else {
-          const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
-          html.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
-        }
-        syncIcon();
-      })();
-      btn.addEventListener('click', () => {
-        const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-        html.setAttribute('data-theme', next);
-        localStorage.setItem(THEME_KEY, next);
-        syncIcon();
-      });
-    })();
-  </script>
 </header>
+
+<!-- เนื้อหาเพจของคุณวางต่อจากนี้ ... -->
+
+<!-- Theme toggle logic -->
+<script>
+(function(){
+  const THEME_KEY = 'pfp.theme';
+  const html = document.documentElement;
+  const btn  = document.getElementById('themeToggle');
+  const icon = document.getElementById('themeIcon');
+
+  function syncIcon(){
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    icon.textContent = isDark ? '☀️' : '🌙';
+    btn?.setAttribute('aria-pressed', String(isDark));
+  }
+  (function init(){
+    const saved = localStorage.getItem(THEME_KEY);
+    if (saved === 'light' || saved === 'dark') {
+      html.setAttribute('data-theme', saved);
+    } else {
+      const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
+      html.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+    }
+    syncIcon();
+  })();
+  btn?.addEventListener('click', () => {
+    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem(THEME_KEY, next);
+    syncIcon();
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <title>PFP ENGINEERING | โซลูชันไอทีสำหรับธุรกิจของคุณ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- ===== SEO basics ===== -->
+  <meta name="description" content="PFP ENGINEERING ให้บริการออกแบบ พัฒนา และดูแลระบบไอทีแบบครบวงจร สำหรับธุรกิจไทย เน้นคุณภาพ ความปลอดภัย และส่งมอบตรงเวลา" />
+  <meta name="keywords" content="PFP ENGINEERING, บริการไอที, ทำเว็บ, ระบบขาย, ออกแบบระบบ, Portfolio" />
+  <meta name="robots" content="index,follow,max-image-preview:large" />
+  <!-- แก้เป็น URL จริงของ GitHub Pages เมื่อรู้แล้ว -->
+  <link rel="canonical" href="https://YOUR_USERNAME.github.io/YOUR_REPO/" />
+
+  <!-- Open Graph / Twitter -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="PFP ENGINEERING" />
+  <meta property="og:title" content="PFP ENGINEERING | โซลูชันไอทีสำหรับธุรกิจของคุณ" />
+  <meta property="og:description" content="บริการออกแบบ พัฒนา และดูแลระบบไอทีแบบครบวงจร" />
+  <meta property="og:image" content="https://YOUR_USERNAME.github.io/YOUR_REPO/images/logo2.jpg" />
+  <meta property="og:url" content="https://YOUR_USERNAME.github.io/YOUR_REPO/" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="PFP ENGINEERING" />
+  <meta name="twitter:description" content="บริการออกแบบ พัฒนา และดูแลระบบไอทีแบบครบวงจร" />
+  <meta name="twitter:image" content="https://YOUR_USERNAME.github.io/YOUR_REPO/images/logo2.jpg" />
+
+  <!-- Structured Data (Organization + Website) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "PFP ENGINEERING",
+    "url": "https://YOUR_USERNAME.github.io/YOUR_REPO/",
+    "logo": "https://YOUR_USERNAME.github.io/YOUR_REPO/images/logo2.jpg",
+    "sameAs": []
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"WebSite",
+    "name":"PFP ENGINEERING",
+    "url":"https://YOUR_USERNAME.github.io/YOUR_REPO/",
+    "potentialAction":{
+      "@type":"SearchAction",
+      "target":"https://www.google.com/search?q={search_term_string}",
+      "query-input":"required name=search_term_string"
+    }
+  }
+  </script>
+
+  <!-- styles (วาง styles.css ใน docs/styles.css) -->
+  <link rel="stylesheet" href="./styles.css" />
+  <link rel="icon" type="image/jpeg" href="./images/logo2.jpg" />
+
+  <style>
+    /* ===== header (ย้ายมาจาก partial เดิมแบบตัด EJS) ===== */
+    .site-header {
+      display:flex; align-items:center; justify-content:space-between;
+      min-height:64px; padding-block:8px; gap:20px;
+    }
+    .brand{ display:flex; align-items:center; gap:10px; text-decoration:none; }
+    .brand-logo{ width:44px; height:44px; object-fit:cover; border-radius:8px; }
+    .nav-left{ display:flex; align-items:center; gap:24px; }
+    .main-nav{ display:flex; align-items:center; gap:18px; }
+    .main-nav a{
+      text-decoration:none; padding:8px 10px; border-radius:8px; font-weight:600;
+      color: var(--muted);
+      transition: background .2s ease, color .2s ease;
+    }
+    .main-nav a:hover{ color: var(--text); background: color-mix(in oklab, var(--primary) 10%, transparent); }
+    .main-nav a.active{
+      background: color-mix(in oklab, var(--primary) 14%, transparent);
+      color: var(--primary);
+    }
+    .header-actions{ display:flex; align-items:center; gap:12px; margin-left:auto; }
+    .cart-link{ text-decoration:none; padding:6px 12px; border-radius:20px; background: rgba(0,0,0,.05); }
+    .cart-badge{ background:#ff3b30; color:#fff; border-radius:999px; padding:2px 6px; font-size:12px; margin-left:4px; }
+    .theme-toggle{
+      display:inline-flex; align-items:center; justify-content:center;
+      height:36px; min-width:36px; padding:0 10px; border-radius:10px;
+      border:1px solid var(--border); background:var(--panel); color:inherit;
+      font-weight:800; cursor:pointer; transition:.2s; order:99;
+    }
+    .theme-toggle:hover{ background: rgba(11,99,246,.06); border-color: rgba(11,99,246,.35); }
+    .theme-toggle:active{ transform: translateY(1px); }
+    .theme-toggle .icon{ font-size:16px; line-height:1; }
+    .navbar{
+      background: rgba(255,255,255,.85);
+      backdrop-filter: blur(8px);
+      border-bottom:1px solid var(--border);
+    }
+    :root[data-theme="dark"] .navbar{ background: rgba(21,25,34,.7); }
+
+    /* ===== Home hero เฉพาะหน้านี้ ===== */
+    .home-hero{
+      display:grid; grid-template-columns: 1.1fr .9fr;
+      gap:24px; align-items:center;
+    }
+    @media (max-width:980px){ .home-hero{ grid-template-columns:1fr; } }
+
+    .cta{ --h:48px; position:relative; display:inline-flex; align-items:center; gap:10px;
+      height:var(--h); padding:0 18px; border-radius:14px; border:1.5px solid transparent;
+      font-weight:800; line-height:1; text-decoration:none;
+      transition: transform .06s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease;
+      will-change: transform;
+    }
+    .cta svg{ flex:0 0 auto; transition: transform .18s ease; }
+    .cta:active{ transform: translateY(1px); }
+    .cta--primary{
+      color:#fff; background: linear-gradient(180deg, var(--primary) 0%, var(--primary-600) 100%);
+      box-shadow: 0 10px 22px rgba(91,124,255,.28);
+      border-color: color-mix(in oklab, var(--primary) 28%, rgba(0,0,0,0));
+    }
+    .cta--primary:hover{ background: linear-gradient(180deg, var(--primary-600) 0%, var(--primary-700) 100%); box-shadow: 0 14px 32px rgba(91,124,255,.34); }
+    .cta--primary:focus-visible{ outline:3px solid color-mix(in oklab, var(--primary) 40%, transparent); outline-offset:2px; }
+    .cta--ghost{ color: var(--primary-700); background: color-mix(in oklab, var(--primary) 10%, transparent);
+      border-color: color-mix(in oklab, var(--primary) 40%, #dde3ff);
+    }
+    .cta--ghost:hover{ background: color-mix(in oklab, var(--primary) 16%, transparent);
+      border-color: color-mix(in oklab, var(--primary) 60%, #cfd8ff);
+    }
+    .cta--ghost:focus-visible{ outline:3px solid color-mix(in oklab, var(--primary) 30%, transparent); outline-offset:2px; }
+    .cta::after{ content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+      background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,.22) 50%, transparent 65%);
+      transform: translateX(-120%); transition: transform .5s ease;
+    }
+    .cta:hover::after{ transform: translateX(120%); }
+    .cta:hover svg{ transform: translateX(2px); }
+    .cta--lg{ --h:52px; padding:0 20px; font-size:15px; border-radius:16px; }
+    @media (max-width:560px){ .cta{ width:100%; justify-content:center; } }
+
+    /* utility */
+    .container{ max-width:1100px; margin:0 auto; padding:0 16px; }
+    footer{ border-top:1px solid var(--border); padding:24px 0; margin-top:28px; color:var(--muted); }
+  </style>
+</head>
+<body>
+  <!-- ===== Header (static) ===== -->
+  <header class="navbar" role="banner">
+    <div class="container site-header">
+      <div class="nav-left">
+        <a class="brand" href="./" aria-label="หน้าแรก PFP">
+          <img src="./images/logo2.jpg" class="brand-logo" alt="PFP Logo" />
+        </a>
+        <nav class="main-nav" role="navigation" aria-label="เมนูหลัก">
+          <a href="./" class="active">หน้าแรก</a>
+          <a href="./products.html">สินค้า</a>
+          <a href="./portfolio.html">ผลงาน</a>
+          <a href="./about.html">เกี่ยวกับเรา</a>
+          <a href="./contact.html">ติดต่อเรา</a>
+        </nav>
+      </div>
+
+      <div class="header-actions">
+        <!-- หน้า static เลยโชว์เป็นตัวอย่างเฉย ๆ -->
+        <a href="./cart.html" class="cart-link">
+          ตะกร้า <span class="cart-badge" id="cartCount">0</span>
+        </a>
+        <button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle theme">
+          <span class="icon" id="themeIcon">🌙</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== Hero ===== -->
+  <main class="container" style="padding:32px 0;">
+    <section class="home-hero">
+      <div>
+        <h1 style="margin:0 0 8px">โซลูชันไอทีสำหรับธุรกิจของคุณ</h1>
+        <p style="margin:0 0 16px;color:var(--muted);">
+          ทีมงาน PFP ENGINEERING ให้บริการออกแบบ พัฒนา และดูแลระบบไอทีแบบครบวงจร
+          มุ่งเน้นคุณภาพ ความปลอดภัย และการส่งมอบตรงเวลา
+        </p>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+          <a href="./products.html" class="cta cta--primary cta--lg" aria-label="ดูบริการของเรา">
+            บริการของเรา
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+          <a href="./contact.html" class="cta cta--ghost cta--lg" aria-label="ติดต่อทีมงาน">
+            ติดต่อทีมงาน
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H7l-4 2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+      <div>
+        <img src="./images/logo1.jpg" alt="งานของ PFP ENGINEERING"
+             style="width:100%;height:auto;max-height:700px;object-fit:contain;border-radius:var(--radius);box-shadow:var(--shadow);" />
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== Footer (static) ===== -->
+  <footer role="contentinfo">
+    <div class="container">
+      <div>PFP ENGINEERING © <span id="y"></span> — All rights reserved.</div>
+    </div>
+  </footer>
+
+  <!-- Theme toggle (เหมือนของเดิมแต่ตัด EJS ออก) -->
+  <script>
+    (function(){
+      const THEME_KEY = 'pfp.theme';
+      const html = document.documentElement;
+      const btn  = document.getElementById('themeToggle');
+      const icon = document.getElementById('themeIcon');
+
+      function syncIcon(){
+        const isDark = html.getAttribute('data-theme') === 'dark';
+        icon.textContent = isDark ? '☀️' : '🌙';
+        btn?.setAttribute('aria-pressed', String(isDark));
+      }
+      (function init(){
+        const saved = localStorage.getItem(THEME_KEY);
+        if (saved === 'light' || saved === 'dark') {
+          html.setAttribute('data-theme', saved);
+        } else {
+          const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
+          html.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+        }
+        syncIcon();
+        const y = document.getElementById('y');
+        if (y) y.textContent = new Date().getFullYear();
+      })();
+      btn?.addEventListener('click', () => {
+        const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-theme', next);
+        localStorage.setItem(THEME_KEY, next);
+        syncIcon();
+      });
+    })();
+  </script>
+</body>
+</html>
