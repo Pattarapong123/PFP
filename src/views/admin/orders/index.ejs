@@ -1,0 +1,229 @@
+<%- include('../partials/head', { title: 'ออเดอร์ • PFP' }) %>
+
+<style>
+  .btn-sm { padding: 6px 12px; font-size: 14px; line-height: 1.2; border-radius: 6px; }
+  .admin-table th, .admin-table td { text-align: center; vertical-align: middle; }
+  .admin-table th.id-col{width:60px;}
+  .admin-table th.date-col{width:220px;}
+  .admin-table th.user-col{width:220px;}
+  .admin-table th.qty-col{width:100px;}
+  .admin-table th.total-col{width:140px;}
+  .admin-table th.status-col{width:140px;}
+  .admin-table th.actions-col{width:200px;}
+  .admin-table .td-actions .admin-btn-group { justify-content:center; }
+  .result-summary{ color: var(--muted); font-size: 13px; margin: 10px 0; }
+
+  /* Search / Filter bar */
+  .filter-bar{
+    display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin:12px 0 16px;
+  }
+  .filter-bar input, .filter-bar select{
+    padding:6px 10px; border:1px solid var(--border); border-radius:6px; font-size:14px; height:36px;
+  }
+
+  /* สไตล์ chip ของสถานะ */
+  .admin-chip{ display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; border:1px solid var(--border); font-weight:800; }
+  .admin-chip .dot{ width:8px; height:8px; border-radius:50%; background:currentColor; display:inline-block; }
+  .admin-chip--warn{ background:#fff7ed; color:#9a3412; border-color:#fed7aa; }
+  .admin-chip--ok{ background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe; }
+  .admin-chip--danger{ background:#fef2f2; color:#991b1b; border-color:#fecaca; }
+</style>
+
+<main class="admin-main"
+      id="adminOrdersPage"
+      data-order-ids="<%= (orders||[]).map(o => o.id).join(',') %>">
+  <div class="page-header admin-main">
+    <div>
+      <nav class="admin-breadcrumbs" aria-label="Breadcrumb">
+        <a href="/admin">แดชบอร์ด</a>
+        <span>/</span>
+        <span>ออเดอร์</span>
+      </nav>
+      <h1 style="margin:6px 0 0;">ออเดอร์</h1>
+      <div class="result-summary">
+        แสดง <%= from %>–<%= to %> จากทั้งหมด <%= total.toLocaleString('th-TH') %> รายการ
+        (หน้า <%= page %>/<%= totalPages %>, ต่อหน้า <%= pageSize %>)
+      </div>
+    </div>
+  </div>
+
+  <!-- Search + Filter (แสดงชื่อสถานะเป็นไทย แต่ส่งค่าอังกฤษ) -->
+  <form class="filter-bar" method="get" action="/admin/orders">
+    <input type="hidden" name="size" value="<%= pageSize %>">
+    <input type="text" name="q" value="<%= typeof q !== 'undefined' ? q : '' %>" placeholder="ค้นหาอีเมลหรือลำดับ #id">
+    <select name="status" aria-label="กรองสถานะ">
+      <option value="">ทุกสถานะ</option>
+      <% (statusOptionsTH || [
+           {v:'PENDING',t:'รอตรวจสลิป'},
+           {v:'PAID',t:'ชำระแล้ว'},
+           {v:'SHIPPED',t:'จัดส่งแล้ว'},
+           {v:'CANCELLED',t:'ยกเลิก'}
+         ]).forEach(function(opt){ %>
+        <option value="<%= opt.v %>" <%= (status === opt.v) ? 'selected' : '' %>><%= opt.t %></option>
+      <% }) %>
+    </select>
+    <button class="admin-btn btn-sm" type="submit">ค้นหา</button>
+    <% if ((q && q.length) || (status && status.length)) { %>
+      <a class="admin-btn btn-sm" href="/admin/orders">รีเซ็ต</a>
+    <% } %>
+  </form>
+
+  <section class="admin-card" style="padding:0;">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th class="id-col">#</th>
+          <th class="date-col">วันที่</th>
+          <th class="user-col">ลูกค้า</th>
+          <th class="qty-col">จำนวนชิ้น</th>
+          <th class="total-col">ยอดรวม</th>
+          <th class="status-col">สถานะ</th>
+          <th class="actions-col">จัดการ</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (!orders || orders.length === 0) { %>
+          <tr>
+            <td colspan="7">
+              <div class="admin-empty">
+                <div class="admin-skeleton" style="max-width: 320px;"></div>
+                <div>ไม่พบออเดอร์</div>
+              </div>
+            </td>
+          </tr>
+        <% } else { %>
+          <% orders.forEach(o => { %>
+            <tr id="row-<%= o.id %>">
+              <td><%= o.id %></td>
+              <td>
+                <%= new Date(o.createdAt).toLocaleString('th-TH', {
+                  day:'numeric', month:'numeric', year:'numeric',
+                  hour:'2-digit', minute:'2-digit', second:'2-digit'
+                }) %>
+              </td>
+              <td><%= o.user?.email || '-' %></td>
+              <td><%= o.items.length %></td>
+              <td><%= o.totalBaht.toLocaleString('th-TH', { minimumFractionDigits: 2 }) %> ฿</td>
+              <td>
+                <span id="order-status-<%= o.id %>"
+                      class="admin-chip <%= o.status === 'CANCELLED' ? 'admin-chip--danger'
+                                      : (o.status === 'SHIPPED' ? 'admin-chip--ok'
+                                      : (o.status === 'PAID' ? 'admin-chip--warn' : '')) %>">
+                  <span class="dot"></span>
+                  <span class="label"><%= (typeof statusLabelTH === 'function') ? statusLabelTH(o.status) : o.status %></span>
+                </span>
+              </td>
+              <td class="td-actions">
+                <div class="admin-btn-group">
+                  <a class="admin-btn admin-btn--soft btn-sm" href="/admin/orders/<%= o.id %>">ดูรายละเอียด</a>
+                  <form method="post" action="/admin/orders/<%= o.id %>/delete"
+                        onsubmit="return confirm('ลบออเดอร์ #<%= o.id %> ?')" style="display:inline;">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button class="admin-btn admin-btn--danger btn-sm" type="submit">ลบ</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        <% } %>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Pagination -->
+  <% if (totalPages > 1) { %>
+    <nav class="admin-pagination" aria-label="pagination" style="margin-top:12px;">
+      <%
+        const base = `/admin/orders?q=${encodeURIComponent(q||'')}&status=${encodeURIComponent(status||'')}`;
+        const makeUrl = (p) => `${base}&page=${p}&size=${pageSize}`;
+      %>
+
+      <a href="<%= makeUrl(1) %>" aria-label="หน้าแรก">«</a>
+      <a href="<%= makeUrl(Math.max(1, page-1)) %>" aria-label="ก่อนหน้า">‹</a>
+
+      <% const win = 2; const start = Math.max(1, page - win); const end = Math.min(totalPages, page + win); %>
+      <% for (let p = start; p <= end; p++) { %>
+        <% if (p === page) { %>
+          <span class="current"><%= p %></span>
+        <% } else { %>
+          <a href="<%= makeUrl(p) %>"><%= p %></a>
+        <% } %>
+      <% } %>
+
+      <a href="<%= makeUrl(Math.min(totalPages, page+1)) %>" aria-label="ถัดไป">›</a>
+      <a href="<%= makeUrl(totalPages) %>" aria-label="หน้าสุดท้าย">»</a>
+    </nav>
+  <% } %>
+
+</main>
+
+<!-- ===== Real-time: SSE + Polling fallback ===== -->
+<script>
+(function(){
+  var root = document.getElementById('adminOrdersPage');
+  if (!root) return;
+
+  // ids of orders in current page
+  var ids = (root.getAttribute('data-order-ids') || '')
+    .split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+  if (!ids.length) return;
+
+  // แผนที่สถานะ->ไทย (สำรองกรณีไม่มี app.locals ใน server)
+  var STATUS_THAI = {
+    PENDING: 'รอตรวจสลิป',
+    PAID: 'ชำระแล้ว',
+    SHIPPED: 'จัดส่งแล้ว',
+    CANCELLED: 'ยกเลิก'
+  };
+
+  function chipClass(status){
+    if (status === 'CANCELLED') return 'admin-chip--danger';
+    if (status === 'SHIPPED') return 'admin-chip--ok';
+    if (status === 'PAID') return 'admin-chip--warn';
+    return ''; // PENDING/others
+  }
+
+  function applyStatus(el, status){
+    if (!el) return;
+    el.classList.remove('admin-chip--danger','admin-chip--ok','admin-chip--warn');
+    var c = chipClass(status);
+    if (c) el.classList.add(c);
+    var label = el.querySelector('.label');
+    if (label) label.textContent = STATUS_THAI[status] || status;
+  }
+
+  function updateBatch(batch){
+    (batch || []).forEach(function(d){
+      var el = document.getElementById('order-status-' + d.id);
+      if (el) applyStatus(el, d.status);
+    });
+  }
+
+  var pollTimer;
+  function startPolling(){
+    clearInterval(pollTimer);
+    pollTimer = setInterval(function(){
+      fetch('/api/orders/status?ids=' + encodeURIComponent(ids.join(',')))
+        .then(function(r){ return r.ok ? r.json() : []; })
+        .then(updateBatch)
+        .catch(function(){});
+    }, 5000);
+  }
+
+  if ('EventSource' in window) {
+    try {
+      var es = new EventSource('/api/orders/status/stream?ids=' + encodeURIComponent(ids.join(',')));
+      es.onmessage = function(ev){
+        try { updateBatch(JSON.parse(ev.data)); } catch(e){}
+      };
+      es.onerror = function(){ startPolling(); };
+    } catch(e) {
+      startPolling();
+    }
+  } else {
+    startPolling();
+  }
+})();
+</script>
+
+<%- include('../partials/foot') %>

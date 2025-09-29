@@ -1,0 +1,109 @@
+<!-- src/views/home.ejs -->
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>PFP ENGINEERING</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="icon" type="image/jpeg" href="/images/logo2.jpg">
+
+  <style>
+    /* ===== Home Hero only (ไม่ยุ่ง header/footer กลาง) ===== */
+    .home-hero{
+      display:grid; grid-template-columns: 1.1fr .9fr;
+      gap:24px; align-items:center;
+    }
+    @media (max-width:980px){ .home-hero{ grid-template-columns:1fr; } }
+
+    /* CTA buttons (ใช้โทนสีจาก styles.css) */
+    .cta{
+      --h:48px;
+      position:relative; display:inline-flex; align-items:center; gap:10px;
+      height:var(--h); padding:0 18px; border-radius:14px; border:1.5px solid transparent;
+      font-weight:800; line-height:1; text-decoration:none;
+      transition: transform .06s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease;
+      will-change: transform;
+    }
+    .cta svg{ flex:0 0 auto; transition: transform .18s ease; }
+    .cta:active{ transform: translateY(1px); }
+
+    .cta--primary{
+      color:#fff;
+      background: linear-gradient(180deg, var(--primary) 0%, var(--primary-600) 100%);
+      box-shadow: 0 10px 22px rgba(91,124,255,.28);
+      border-color: color-mix(in oklab, var(--primary) 28%, rgba(0,0,0,0));
+    }
+    .cta--primary:hover{
+      background: linear-gradient(180deg, var(--primary-600) 0%, var(--primary-700) 100%);
+      box-shadow: 0 14px 32px rgba(91,124,255,.34);
+    }
+    .cta--primary:focus-visible{
+      outline:3px solid color-mix(in oklab, var(--primary) 40%, transparent);
+      outline-offset:2px;
+    }
+
+    .cta--ghost{
+      color: var(--primary-700);
+      background: color-mix(in oklab, var(--primary) 10%, transparent);
+      border-color: color-mix(in oklab, var(--primary) 40%, #dde3ff);
+    }
+    .cta--ghost:hover{
+      background: color-mix(in oklab, var(--primary) 16%, transparent);
+      border-color: color-mix(in oklab, var(--primary) 60%, #cfd8ff);
+    }
+    .cta--ghost:focus-visible{
+      outline:3px solid color-mix(in oklab, var(--primary) 30%, transparent);
+      outline-offset:2px;
+    }
+    .cta::after{
+      content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+      background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,.22) 50%, transparent 65%);
+      transform: translateX(-120%); transition: transform .5s ease;
+    }
+    .cta:hover::after{ transform: translateX(120%); }
+    .cta:hover svg{ transform: translateX(2px); }
+    .cta--lg{ --h:52px; padding:0 20px; font-size:15px; border-radius:16px; }
+    @media (max-width:560px){ .cta{ width:100%; justify-content:center; } }
+  </style>
+</head>
+<body>
+
+  <!-- Header กลางของเว็บ (มีโหมดมืด/สว่าง, active menu, ตะกร้า ฯลฯ) -->
+  <%- include('partials/header') %>
+
+  <!-- Hero -->
+  <main class="container" style="padding:32px 0;">
+    <section class="home-hero">
+      <div>
+        <h1 style="margin:0 0 8px">โซลูชันไอทีสำหรับธุรกิจของคุณ</h1>
+        <p style="margin:0 0 16px;color:var(--muted);">
+          ทีมงาน PFP ENGINEERING ให้บริการออกแบบ พัฒนา และดูแลระบบไอทีแบบครบวงจร
+          มุ่งเน้นคุณภาพ ความปลอดภัย และการส่งมอบตรงเวลา
+        </p>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+          <a href="/products" class="cta cta--primary cta--lg" aria-label="ดูบริการของเรา">
+            บริการของเรา
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+          <a href="/contact" class="cta cta--ghost cta--lg" aria-label="ติดต่อทีมงาน">
+            ติดต่อทีมงาน
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H7l-4 2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+      <div>
+        <img src="/images/logo1.jpg" alt=""
+             style="width:100%;height:auto;max-height:700px;object-fit:contain;border-radius:var(--radius);box-shadow:var(--shadow);">
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer กลาง + Contact Widget -->
+  <%- include('partials/footer') %>
+</body>
+</html>

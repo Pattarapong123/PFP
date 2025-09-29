@@ -1,0 +1,61 @@
+<%- include('../partials/head', { title: 'หน่วยนับ • Admin' }) %>
+
+<div class="page-header">
+  <h1 style="margin:6px 0 0;">หน่วยนับ</h1>
+</div>
+
+<div class="admin-card">
+  <form class="admin-row" method="post" action="/admin/units">
+    <!-- CSRF -->
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+    <div class="admin-field">
+      <label>ชื่อหน่วย</label>
+      <input class="admin-input" type="text" name="name" placeholder="เช่น ชิ้น, กล่อง, เมตร" value="<%= values?.name || '' %>">
+    </div>
+    <div class="admin-field">
+      <label>ตัวย่อ (ถ้ามี)</label>
+      <input class="admin-input" type="text" name="shortName" placeholder="เช่น pcs, box, m" value="<%= values?.shortName || '' %>">
+    </div>
+    <div class="admin-field" style="align-self:flex-end;">
+      <button class="admin-btn">+ เพิ่มหน่วย</button>
+    </div>
+  </form>
+  <% if (errors) { %>
+    <p class="text-danger" style="margin-top:8px;"><%= errors %></p>
+  <% } %>
+</div>
+
+<div class="admin-card" style="padding:0; margin-top:12px;">
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th style="width:80px;">#</th>
+        <th>ชื่อหน่วย</th>
+        <th style="width:220px;">ตัวย่อ</th>
+        <th style="width:160px;">จัดการ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (!units || units.length === 0) { %>
+        <tr><td colspan="4"><div class="admin-empty">ยังไม่มีหน่วยนับ</div></td></tr>
+      <% } %>
+      <% (units || []).forEach(u => { %>
+        <tr>
+          <td><%= u.id %></td>
+          <td style="text-align:left;font-weight:800;"><%= u.name %></td>
+          <td><%= u.shortName || '-' %></td>
+          <td class="td-actions">
+            <form method="post" action="/admin/units/<%= u.id %>/delete" onsubmit="return confirm('ลบหน่วยนี้?');" style="display:inline">
+              <!-- CSRF -->
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <button class="admin-btn admin-btn--danger admin-btn--sm">ลบ</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/foot') %>

@@ -1,0 +1,375 @@
+<!-- src/views/orders-mine.ejs (standalone, no include) -->
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>ออเดอร์ของฉัน • PFP</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/jpeg" href="/images/logo2.jpg">
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    /* ====== Local styles just for this page ====== */
+    .page{ display:grid; gap:16px; }
+    .summary{ background:#fff; border:1px solid var(--border); border-radius:16px; padding:12px 16px; box-shadow:var(--shadow); }
+    .orders{ display:grid; gap:12px; }
+    .card{ background:#fff; border:1px solid var(--border); border-radius:14px; padding:14px; box-shadow:var(--shadow); }
+    .row{ display:grid; grid-template-columns: 1fr auto; gap:10px; align-items:center; }
+    .meta{ color:var(--muted); font-size:.9rem; }
+    .status{ font-weight:900; border-radius:999px; padding:6px 10px; }
+    .s-PENDING{ background:#fff7ed; color:#9a3412; border:1px solid #fed7aa; }
+    .s-PAID{ background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0; }
+    .s-SHIPPED{ background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; }
+    .s-CANCELLED{ background:#fef2f2; color:#991b1b; border:1px solid #fecaca; }
+    .tbl{ width:100%; border-collapse:separate; border-spacing:0; margin-top:8px; }
+    .tbl th,.tbl td{ padding:8px 10px; border-bottom:1px solid var(--border); }
+    .num{ text-align:right; white-space:nowrap; }
+
+    /* Upload slip */
+    .slip-wrap{ margin-top:12px; border:1px dashed var(--border); border-radius:12px; padding:12px; background:var(--panel); }
+    .slip-title{ font-weight:900; margin-bottom:6px; display:flex; align-items:center; gap:8px; }
+    .slip-grid{ display:grid; gap:10px; grid-template-columns: 1fr auto; align-items:center; }
+    @media (max-width:680px){ .slip-grid{ grid-template-columns:1fr; } }
+
+    .drop{ position:relative; display:flex; align-items:center; gap:10px; padding:10px; border:1px solid var(--border); border-radius:12px; background:#fff; cursor:pointer; }
+    .drop:hover{ border-color: color-mix(in oklab, var(--primary) 45%, var(--border)); }
+    .drop input[type=file]{ position:absolute; inset:0; opacity:0; cursor:pointer; }
+    .thumb{ width:110px; height:78px; object-fit:cover; border:1px solid var(--border); border-radius:10px; background:#fff; display:none; }
+    .file-meta{ color:var(--muted); font-size:.9rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .hint{ font-size:.85rem; color:var(--muted); }
+    .btn{ display:inline-flex; align-items:center; justify-content:center; padding:10px 14px; border-radius:12px; background:var(--primary); color:#fff; border:1px solid color-mix(in oklab,var(--primary) 70%, #0000); font-weight:800; }
+    .btn--soft{ background:#f3f4f6; color:#111; border:1px solid var(--border); }
+    .btn[disabled]{ opacity:.5; cursor:not-allowed; }
+
+    /* Navbar tweaks (self-contained) */
+    header.navbar{ border-bottom:1px solid var(--border); background:#fff; }
+    .site-header{ display:flex; align-items:center; justify-content:space-between; gap:16px; padding:10px 0; }
+    .brand-logo{ width:44px; height:44px; object-fit:cover; border-radius:8px; box-shadow:var(--shadow-sm); }
+    .main-nav a{ padding:8px 10px; border-radius:10px; text-decoration:none; color:var(--text); font-weight:700; }
+    .main-nav a.active{ background:var(--panel); border:1px solid var(--border); }
+    .btn--outline{ background:transparent; color:var(--primary); border:1px solid var(--primary); }
+    .btn--sm{ padding:8px 12px; border-radius:10px; font-size:.92rem; }
+  </style>
+</head>
+<body>
+
+  <!-- ===== Navbar (self-contained, no include) ===== -->
+  <header class="navbar">
+    <div class="container site-header">
+      <a class="brand" href="/" style="display:flex;align-items:center;">
+        <img src="/images/logo2.jpg" class="brand-logo" alt="PFP Logo">
+      </a>
+
+      <%
+      const _raw = (path || '');
+      const _noQuery = _raw.split('?')[0].split('#')[0];
+      const currentPath = _noQuery.replace(/\/+$/,'') || '/';
+      const isAt = (p) => currentPath === p;
+      const startsAt = (p) => currentPath === p || currentPath.startsWith(p + '/');
+      %>
+
+      <nav class="main-nav" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+        <a href="/" class="<%= isAt('/') ? 'active' : '' %>" <%= isAt('/') ? 'aria-current="page"' : '' %>>หน้าแรก</a>
+        <a href="/products"  class="<%= startsAt('/products')  ? 'active' : '' %>" <%= startsAt('/products')  ? 'aria-current="page"' : '' %>>สินค้า</a>
+        <a href="/portfolio" class="<%= startsAt('/portfolio') ? 'active' : '' %>" <%= startsAt('/portfolio') ? 'aria-current="page"' : '' %>>ผลงาน</a>
+        <a href="/about"     class="<%= isAt('/about')        ? 'active' : '' %>" <%= isAt('/about')        ? 'aria-current="page"' : '' %>>เกี่ยวกับเรา</a>
+        <a href="/contact"   class="<%= isAt('/contact')      ? 'active' : '' %>" <%= isAt('/contact')      ? 'aria-current="page"' : '' %>>ติดต่อเรา</a>
+
+        <a href="/cart"
+           class="cart-link <%= startsAt('/cart') || startsAt('/checkout') ? 'active' : '' %>"
+           <%= (startsAt('/cart') || startsAt('/checkout')) ? 'aria-current="page"' : '' %>
+           aria-label="ตะกร้าสินค้า">
+          ตะกร้า (<span id="cartCount"><%= cartCount %></span>)
+        </a>
+
+        <% if (user) { %>
+          <a href="/orders/mine" class="<%= startsAt('/orders/mine') ? 'active' : '' %>">ออเดอร์ของฉัน</a>
+          <span style="color:var(--muted)">สวัสดี, <%= user.name || user.email %></span>
+          <form method="post" action="/auth/logout" style="margin:0;display:inline;">
+            <button class="btn btn--outline btn--sm">ออกจากระบบ</button>
+          </form>
+        <% } else { %>
+          <a href="/auth/login" class="<%= startsAt('/auth/login') ? 'active' : '' %>">เข้าสู่ระบบ</a>
+        <% } %>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container" style="padding:20px 0 40px;">
+    <h1 style="margin:0 0 12px;">ออเดอร์ของฉัน</h1>
+
+    <div class="page" id="ordersPage"
+         data-order-ids="<%= orders.map(o => o.id).join(',') %>">
+      <div class="summary">
+        แสดง <%= from %>–<%= to %> จากทั้งหมด <%= total.toLocaleString('th-TH') %> รายการ
+        (หน้า <%= page %>/<%= totalPages %>, ต่อหน้า <%= pageSize %>)
+      </div>
+
+      <div class="orders">
+        <% if (!orders.length) { %>
+          <div class="card">ยังไม่มีออเดอร์</div>
+        <% } %>
+
+        <% orders.forEach(o => { %>
+          <div class="card" id="order-<%= o.id %>">
+            <div class="row">
+              <div>
+                <div style="font-weight:900;">ออเดอร์ #<%= o.id %></div>
+                <div class="meta">
+                  สร้างเมื่อ <%= new Date(o.createdAt).toLocaleString('th-TH') %>
+                  • ยอดรวม <%= Number(o.totalBaht).toLocaleString('th-TH',{minimumFractionDigits:2}) %> ฿
+                </div>
+              </div>
+              <div>
+                <!-- แสดงสถานะเป็นภาษาไทยตอนเรนเดอร์ -->
+                <span id="order-status-<%= o.id %>" class="status s-<%= o.status %>">
+                  <%= statusLabelTH ? statusLabelTH(o.status) : o.status %>
+                </span>
+              </div>
+            </div>
+
+            <table class="tbl">
+              <thead>
+                <tr>
+                  <th>สินค้า</th>
+                  <th class="num">จำนวน</th>
+                  <th class="num">ราคา/หน่วย</th>
+                  <th class="num">รวม</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% o.items.forEach(it => { %>
+                  <tr>
+                    <td><%= it.product ? it.product.name : ('#'+it.productId) %></td>
+                    <td class="num"><%= it.qty %></td>
+                    <td class="num"><%= Number(it.unitPriceBaht).toLocaleString('th-TH',{minimumFractionDigits:2}) %> ฿</td>
+                    <td class="num"><%= Number(it.unitPriceBaht * it.qty).toLocaleString('th-TH',{minimumFractionDigits:2}) %> ฿</td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+
+            <!-- Tracking info -->
+            <div id="track-wrap-<%= o.id %>" class="hint" style="margin-top:8px; display:<%= (o.trackingNo || o.status === 'SHIPPED') ? 'block' : 'none' %>;">
+              เลขพัสดุ: <b id="order-track-<%= o.id %>"><%= o.trackingNo || '-' %></b>
+              <span class="meta"> • จัดส่งเมื่อ: <span id="order-shippedAt-<%= o.id %>"><%= o.shippedAt ? new Date(o.shippedAt).toLocaleString('th-TH') : '-' %></span></span>
+            </div>
+
+            <% if (o.slipUrl) { %>
+              <div class="hint" style="margin-top:8px;">
+                สลิปที่แนบแล้ว:
+                <a class="link-strong" href="<%= o.slipUrl %>" target="_blank" rel="noopener">เปิดดู</a>
+              </div>
+            <% } %>
+
+            <% if (o.status === 'PENDING') { %>
+              <div class="slip-wrap">
+                <div class="slip-title">อัปโหลดสลิปชำระเงิน</div>
+                <form class="slip-form" method="post" action="/orders/<%= o.id %>/slip" enctype="multipart/form-data" novalidate>
+                  <% if (typeof csrfToken !== 'undefined' && csrfToken) { %>
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <% } %>
+
+                  <div class="slip-grid">
+                    <label class="drop" for="file-<%= o.id %>">
+                      <img id="thumb-<%= o.id %>" class="thumb" alt="">
+                      <div>
+                        <div><strong>เลือกรูปสลิป / ลากมาวาง</strong></div>
+                        <div class="file-meta" id="meta-<%= o.id %>">รองรับ JPG/PNG/WebP/PDF (≤ 5MB)</div>
+                      </div>
+                      <input id="file-<%= o.id %>" type="file" name="slipFile" accept="image/*,application/pdf">
+                    </label>
+
+                    <div style="display:flex;gap:8px;justify-content:flex-end;">
+                      <button class="btn--soft btn" type="button" data-clear="<%= o.id %>">ล้างไฟล์</button>
+                      <button class="btn" type="submit" id="btn-<%= o.id %>" disabled>ส่งสลิป</button>
+                    </div>
+                  </div>
+                  <div class="hint" style="margin-top:6px;">
+                    * เมื่อทีมงานตรวจสอบแล้ว สถานะจะเปลี่ยนเป็น <b>ชำระแล้ว</b> โดยอัตโนมัติ
+                  </div>
+                </form>
+              </div>
+            <% } %>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+  </main>
+
+  <footer class="container" style="padding:24px 0;color:var(--muted);">
+    © <span id="year"></span> PFP ENGINEERING
+  </footer>
+
+  <!-- ===== Real-time order status (SSE + polling fallback) ===== -->
+  <script>
+  (function(){
+    // แผนที่สถานะ -> ภาษาไทย (ให้ตรงกับฝั่ง server helpers)
+    var TH = {
+      PENDING: 'รอตรวจสลิป',
+      PAID: 'ชำระแล้ว',
+      SHIPPED: 'จัดส่งแล้ว',
+      CANCELLED: 'ยกเลิก'
+    };
+
+    function applyStatus(el, status){
+      if (!el) return;
+      var s = String(status || '').toUpperCase();
+      el.textContent = TH[s] || s;
+      el.className = 'status s-' + s;
+    }
+
+    // อัปเดตเลขพัสดุ/เวลาแบบเรียลไทม์
+    function applyTracking(orderId, trackingNo, shippedAtISO){
+      var wrap = document.getElementById('track-wrap-' + orderId);
+      var elTrack = document.getElementById('order-track-' + orderId);
+      var elShipped = document.getElementById('order-shippedAt-' + orderId);
+
+      var hasInfo = !!(trackingNo || shippedAtISO);
+      if (wrap) wrap.style.display = hasInfo ? 'block' : ((elTrack||elShipped) ? 'none' : '');
+
+      if (elTrack) elTrack.textContent = trackingNo || '-';
+      if (elShipped) {
+        if (shippedAtISO) {
+          try {
+            var dt = new Date(shippedAtISO);
+            elShipped.textContent = dt.toLocaleString('th-TH');
+          } catch(e) { elShipped.textContent = '-'; }
+        } else {
+          elShipped.textContent = '-';
+        }
+      }
+    }
+
+    function updateOrders(batch){
+      (batch || []).forEach(function(d){
+        var el = document.getElementById('order-status-' + d.id);
+        if (el) applyStatus(el, d.status);
+        applyTracking(d.id, d.trackingNo || null, d.shippedAt || null);
+      });
+    }
+
+    var root = document.getElementById('ordersPage');
+    if (!root) return;
+    var ids = (root.getAttribute('data-order-ids') || '')
+                .split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+    if (!ids.length) return;
+
+    var url = '/api/orders/status/stream?ids=' + encodeURIComponent(ids.join(','));
+    if ('EventSource' in window) {
+      try {
+        var es = new EventSource(url);
+        es.onmessage = function(ev){
+          try { updateOrders(JSON.parse(ev.data)); } catch(e){}
+        };
+        es.onerror = function(){ /* เงียบไว้ */ };
+      } catch(e) { startPolling(); }
+    } else {
+      startPolling();
+    }
+
+    var pollTimer;
+    function startPolling(){
+      clearInterval(pollTimer);
+      pollTimer = setInterval(function(){
+        fetch('/api/orders/status?ids=' + encodeURIComponent(ids.join(',')))
+          .then(function(r){ return r.ok ? r.json() : []; })
+          .then(updateOrders)
+          .catch(function(){});
+      }, 7000);
+    }
+  })();
+  </script>
+
+  <!-- Slip upload handlers (preview/validate/clear) -->
+  <script>
+  (function(){
+    var MAX = 5 * 1024 * 1024; // 5MB
+    function byId(id){ return document.getElementById(id); }
+
+    document.querySelectorAll('.slip-form').forEach(function(form){
+      var orderId = form.action.split('/').slice(-2)[0]; // .../orders/:id/slip
+      var input   = byId('file-'  + orderId);
+      var thumb   = byId('thumb-' + orderId);
+      var meta    = byId('meta-'  + orderId);
+      var btnSend = byId('btn-'   + orderId);
+      var btnClear= form.querySelector('[data-clear]');
+
+      function resetView(){
+        btnSend.disabled = true;
+        if (thumb){ thumb.style.display='none'; thumb.src=''; }
+        if (meta){ meta.textContent = 'รองรับ JPG/PNG/WebP/PDF (≤ 5MB)'; }
+      }
+      resetView();
+
+      input.addEventListener('change', function(){
+        var f = input.files && input.files[0];
+        if (!f){ resetView(); return; }
+        if (!(f.type.startsWith('image/') || f.type === 'application/pdf')){
+          alert('ชนิดไฟล์ไม่ถูกต้อง กรุณาอัปโหลดรูปภาพหรือไฟล์ PDF');
+          input.value = ''; resetView(); return;
+        }
+        if (f.size > MAX){
+          alert('ไฟล์ใหญ่เกิน 5MB');
+          input.value = ''; resetView(); return;
+        }
+        btnSend.disabled = false;
+        if (f.type === 'application/pdf'){
+          if (thumb){ thumb.style.display='none'; thumb.src=''; }
+          if (meta){ meta.textContent = f.name + ' (' + Math.round(f.size/1024) + ' KB)'; }
+        }else{
+          var url = URL.createObjectURL(f);
+          if (thumb){ thumb.src = url; thumb.style.display='block'; }
+          if (meta){ meta.textContent = f.name + ' (' + Math.round(f.size/1024) + ' KB)'; }
+        }
+      });
+
+      if (btnClear){
+        btnClear.addEventListener('click', function(){
+          input.value = '';
+          resetView();
+        });
+      }
+
+      // drag-over highlight (optional)
+      var drop = form.querySelector('.drop');
+      if (drop){
+        ;['dragenter','dragover'].forEach(function(ev){
+          drop.addEventListener(ev, function(e){ e.preventDefault(); drop.style.borderColor = 'var(--primary)'; });
+        });
+        ;['dragleave','drop'].forEach(function(ev){
+          drop.addEventListener(ev, function(e){ e.preventDefault(); drop.style.borderColor = ''; });
+        });
+        drop.addEventListener('drop', function(e){
+          var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+          if (f){ input.files = e.dataTransfer.files; input.dispatchEvent(new Event('change')); }
+        });
+      }
+    });
+  })();
+  </script>
+
+  <!-- Fallback active state on client -->
+  <script>
+  (function(){
+    try {
+      var nav = document.querySelector('.main-nav');
+      if (!nav) return;
+      var hasActive = nav.querySelector('a.active');
+      if (hasActive) return;
+      var p = location.pathname.replace(/\/+$/,'') || '/';
+      var links = nav.querySelectorAll('a[href]');
+      links.forEach(function(a){
+        var href = a.getAttribute('href') || '';
+        var norm = href.replace(/\/+$/,'') || '/';
+        if (norm === p || (p.startsWith(norm + '/') && norm !== '/')) {
+          a.classList.add('active');
+          a.setAttribute('aria-current','page');
+        }
+      });
+    } catch(e) {}
+  })();
+  </script>
+
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>

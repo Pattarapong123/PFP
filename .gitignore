@@ -1,0 +1,12 @@
+﻿node_modules/
+.env
+*.env.local
+public/uploads/
+node_modules/.prisma/
+prisma/dev.db
+prisma/dev.db-journal
+dist/
+build/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json

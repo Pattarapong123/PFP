@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title><%= (typeof title !== 'undefined' ? title : 'ผลงาน') %> - PFP ENGINEERING</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="ตัวอย่างผลงานติดตั้งระบบไฟฟ้า ตู้คอนโทรล ระบบเน็ตเวิร์ก และงานวิศวกรรมโดย PFP Engineering" />
+  <link rel="stylesheet" href="/styles.css">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/jpeg" href="/image/logo2.jpg">
+
+  <style>
+    .pf-hero{
+      position: relative;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, #f7f8fc 0%, #ffffff 100%);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      margin-bottom: 18px;
+    }
+    .pf-hero .title{
+      font-size: clamp(24px, 4vw, 36px);
+      font-weight: 900;
+      margin: 4px 0 6px;
+    }
+    .pf-hero .sub{
+      color: var(--muted);
+      max-width: 760px;
+    }
+
+    .work-grid{
+      --gap: 18px;
+      display:grid; gap: var(--gap);
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    }
+    .work-card{
+      display:flex; flex-direction:column;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+      min-height: 300px;
+    }
+    .work-card:hover{
+      transform: translateY(-4px);
+      box-shadow: 0 16px 36px rgba(16,24,40,.16);
+      border-color: color-mix(in oklab, var(--primary) 30%, var(--border));
+    }
+
+    .work-media{
+      padding: 14px 14px 0;
+      background: linear-gradient(180deg, #f7f8fc 0%, #ffffff 100%);
+      border-bottom: 1px solid var(--border);
+    }
+    .work-thumb{
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      display: block;
+      transition: transform .2s ease;
+    }
+    .work-card:hover .work-thumb{ transform: scale(1.01); }
+
+    .work-body{
+      padding: 12px 14px 14px;
+      display:flex; flex-direction:column; gap:6px; flex:1 1 auto;
+    }
+    .work-title{
+      margin: 6px 0 2px; font-size: 18px; font-weight: 900; line-height: 1.35;
+      display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+      min-height: 46px;
+    }
+    .work-summary{
+      color: var(--muted);
+      display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;
+      min-height: 66px;
+    }
+
+    .work-footer{
+      margin-top: 8px;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+    }
+    .work-footer .btn{ padding: 10px 12px; border-radius: 12px; }
+  </style>
+</head>
+<body>
+
+  <%- include('partials/header') %>
+
+  <main class="container" style="padding:24px 0;">
+    <!-- Hero -->
+    <section class="pf-hero">
+      <h1 class="title">ผลงานของเรา</h1>
+      <p class="sub">
+        รวมตัวอย่างงานติดตั้งระบบไฟฟ้า ตู้คอนโทรล ระบบเครือข่าย และงานวิศวกรรมที่ PFP Engineering ส่งมอบคุณภาพให้ลูกค้า
+      </p>
+    </section>
+
+    <% if (!posts || posts.length === 0) { %>
+      <section class="admin-card">
+        <div class="admin-empty" style="padding:24px;">
+          <div class="admin-skeleton" style="max-width: 360px;"></div>
+          <div>ยังไม่มีผลงานที่เผยแพร่ในขณะนี้</div>
+        </div>
+      </section>
+    <% } else { %>
+      <section class="work-grid">
+        <% posts.forEach(post => { 
+             const img = post.featuredImageUrl || '/image/logo2.jpg';
+        %>
+          <article class="work-card">
+            <div class="work-media">
+              <a href="/portfolio/<%= post.slug %>">
+                <img class="work-thumb" src="<%= img %>" alt="ภาพปก: <%= post.title %>">
+              </a>
+            </div>
+            <div class="work-body">
+              <h3 class="work-title">
+                <a href="/portfolio/<%= post.slug %>"><%= post.title %></a>
+              </h3>
+
+              <% if (post.summary) { %>
+                <p class="work-summary"><%= post.summary %></p>
+              <% } else { %>
+                <p class="work-summary muted">ยังไม่มีสรุปสั้นสำหรับงานนี้</p>
+              <% } %>
+
+              <div class="work-footer">
+                <a class="btn btn--primary" href="/portfolio/<%= post.slug %>">ดูรายละเอียด</a>
+                <span style="color:var(--muted); font-size:13px;">PFP Engineering</span>
+              </div>
+            </div>
+          </article>
+        <% }) %>
+      </section>
+    <% } %>
+  </main>
+
+  <%- include('partials/footer') %>
+</body>
+</html>

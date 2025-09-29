@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <title>ออเดอร์ #<%= order.id %> • PFP</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    .grid{ display:grid; gap:18px; grid-template-columns: 1.2fr .8fr; }
+    @media (max-width: 980px){ .grid{ grid-template-columns: 1fr; } }
+    .chip{ display:inline-flex; align-items:center; gap:6px; padding:4px 8px; border-radius:999px; border:1px solid var(--border); font-size:.9rem; }
+    .chip-ok{ background:#ecfdf5; border-color:#10b981; color:#065f46; }
+    .chip-warn{ background:#fff7ed; border-color:#f59e0b; color:#92400e; }
+    .chip-danger{ background:#fef2f2; border-color:#ef4444; color:#991b1b; }
+    .td-right{ text-align:right; }
+    .thumb{ width:56px; height:56px; object-fit:cover; border:1px solid var(--border); border-radius:10px; background:#fff; }
+  </style>
+</head>
+<body>
+  <%- include('partials/header') %>
+
+  <main class="container" style="padding:24px 0;">
+    <a class="btn btn--ghost" href="/orders/mine" style="margin-bottom:10px;">← กลับรายการออเดอร์</a>
+
+    <div class="grid">
+      <section class="card">
+        <h1 style="margin:0 0 8px;">ออเดอร์ #<%= order.id %></h1>
+        <div style="color:var(--muted); margin-bottom:10px;">
+          วันที่: <%= new Date(order.createdAt).toLocaleString('th-TH', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }) %>
+          &nbsp;•&nbsp;
+          สถานะ:
+          <% if (order.status === 'SHIPPED') { %>
+            <span class="chip chip-ok">SHIPPED</span>
+          <% } else if (order.status === 'PAID') { %>
+            <span class="chip chip-warn">PAID</span>
+          <% } else if (order.status === 'CANCELLED') { %>
+            <span class="chip chip-danger">CANCELLED</span>
+          <% } else { %>
+            <span class="chip">PENDING</span>
+          <% } %>
+        </div>
+
+        <table class="table">
+          <thead>
+            <tr>
+              <th style="text-align:left;">สินค้า</th>
+              <th>จำนวน</th>
+              <th>ราคา/หน่วย</th>
+              <th class="td-right">รวม</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% order.items.forEach(it => { %>
+              <tr>
+                <td style="text-align:left;">
+                  <a class="link-strong" href="/products/<%= it.productSlug %>"><%= it.productName %></a>
+                </td>
+                <td><%= it.qty %></td>
+                <td><%= it.unitPriceBaht.toLocaleString('th-TH', { minimumFractionDigits: 2 }) %> ฿</td>
+                <td class="td-right"><%= (it.unitPriceBaht * it.qty).toLocaleString('th-TH', { minimumFractionDigits: 2 }) %> ฿</td>
+              </tr>
+            <% }) %>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3" class="td-right" style="font-weight:800;">รวมสุทธิ</td>
+              <td class="td-right" style="font-weight:800;"><%= order.totalBaht.toLocaleString('th-TH', { minimumFractionDigits: 2 }) %> ฿</td>
+            </tr>
+          </tfoot>
+        </table>
+      </section>
+
+      <aside class="card">
+        <h2 style="margin:0 0 8px;">ที่อยู่จัดส่ง</h2>
+        <% if (order.shippingAddress) { %>
+          <div><%= order.shippingAddress.line1 %></div>
+          <% if (order.shippingAddress.line2) { %><div><%= order.shippingAddress.line2 %></div><% } %>
+          <div>
+            <%= order.shippingAddress.district %>
+            <% if (order.shippingAddress.zone) { %>, <%= order.shippingAddress.zone %><% } %>,
+            <%= order.shippingAddress.province %> <%= order.shippingAddress.postcode %>
+          </div>
+          <% if (order.shippingAddress.phone) { %>
+            <div style="margin-top:6px;color:var(--muted);">โทร: <%= order.shippingAddress.phone %></div>
+          <% } %>
+        <% } else { %>
+          <div class="muted">-</div>
+        <% } %>
+
+        <% if (order.paymentSlipUrl) { %>
+          <hr>
+          <h3 style="margin:0 0 6px;">สลิปการโอน</h3>
+          <img src="<%= order.paymentSlipUrl %>" alt="สลิปการโอน" style="width:100%;max-width:320px;border:1px solid var(--border);border-radius:12px;">
+        <% } %>
+      </aside>
+    </div>
+  </main>
+
+  <%- include('partials/footer') %>
+</body>
+</html>

@@ -1,0 +1,324 @@
+<%- include('partials/head', { title: 'แดชบอร์ด • PFP' }) %>
+
+<style>
+  :root{
+    --gap:14px;
+    --radius:14px;
+  }
+
+  /* ====== 4 การ์ดสถิติด้านบน (ปรับใหม่) ====== */
+  .stat-grid{
+    display:grid; gap:var(--gap);
+    grid-template-columns: repeat(4, minmax(0,1fr));
+  }
+  @media (max-width: 1200px){ .stat-grid{ grid-template-columns: repeat(2, minmax(0,1fr)); } }
+  @media (max-width: 680px){ .stat-grid{ grid-template-columns: 1fr; } }
+
+  /* ทำทั้งการ์ดเป็นลิงก์คลิกได้ */
+  .stat-card{
+    display:flex; align-items:center; gap:14px;
+    padding:18px; border:1px solid var(--border); border-radius:var(--radius);
+    background:var(--panel); box-shadow: var(--shadow);
+    min-height:92px;
+    text-decoration:none; color:inherit;          /* สำคัญ: a แบบการ์ด */
+    transition: transform .08s ease, box-shadow .12s ease, border-color .12s ease;
+  }
+  .stat-card:hover{
+    transform: translateY(-2px);
+    border-color: color-mix(in oklab, var(--primary) 22%, var(--border));
+    box-shadow: 0 10px 24px rgba(16,24,40,.10);
+  }
+
+  .stat-ico{
+    width:54px; height:54px; border-radius:12px; flex:0 0 auto;
+    display:grid; place-items:center; font-size:24px; font-weight:900;
+    background: var(--primary-50); color: var(--primary-700); border:1px solid var(--primary-100);
+  }
+  .stat-meta{ display:flex; flex-direction:column; line-height:1.25; }
+  .stat-meta .label{ color:var(--muted); font-size:12px; letter-spacing:.2px; }
+  .stat-meta .value{ font-size:24px; font-weight:900; letter-spacing:.2px; }
+  .stat-sub{ font-size:13px; color:var(--muted); margin-top:2px; }
+
+  /* ===== ของเดิม (ส่วนอื่นๆ) ===== */
+  .todo-grid{
+    display:grid; gap:12px; grid-template-columns: repeat(2, minmax(0,1fr));
+  }
+  @media (max-width:900px){ .todo-grid{ grid-template-columns: 1fr; } }
+
+  .todo-card{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:12px 14px; border:1px solid var(--border); border-radius:12px; background:var(--panel);
+    min-height:68px;
+  }
+  .todo-title{ font-weight:900; }
+  .todo-meta{ color:var(--muted); font-size:13px; }
+
+  .admin-grid{
+    display:grid; gap:var(--gap);
+    grid-template-columns: minmax(0,2fr) minmax(280px,1fr);
+    align-items:start;
+  }
+  @media (max-width: 1120px){ .admin-grid{ grid-template-columns: 1fr; } }
+
+  .admin-card{ border-radius:var(--radius); }
+
+  .mini-table{ width:100%; border-collapse:collapse; }
+  .mini-table th, .mini-table td{
+    padding:10px 12px; border-bottom:1px solid var(--border); vertical-align:middle;
+  }
+  .mini-table th{
+    text-align:left; color:var(--muted); font-weight:800;
+    background: color-mix(in oklab, var(--primary) 6%, transparent);
+  }
+  .mini-table tr:last-child td{ border-bottom:0; }
+  .td-right{ text-align:right; white-space:nowrap; }
+
+  .admin-chip{ display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; border:1px solid var(--border); font-weight:800; }
+  .admin-chip .dot{ width:8px; height:8px; border-radius:50%; background:currentColor; display:inline-block; }
+  .admin-chip--warn{ background:#fff7ed; color:#9a3412; border-color:#fed7aa; }
+  .admin-chip--ok{ background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe; }
+  .admin-chip--danger{ background:#fef2f2; color:#991b1b; border-color:#fecaca; }
+
+  .log-title{ font-weight:800; }
+  .log-meta{ color:var(--muted); font-size:12px; }
+
+  .spark{ font-size:12px; color:var(--muted); }
+</style>
+
+<main class="admin-main">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <nav class="admin-breadcrumbs" aria-label="Breadcrumb">
+        <a href="/admin">แอดมิน</a><span>/</span><span>แดชบอร์ด</span>
+      </nav>
+      <h1 style="margin:6px 0 0;">แดชบอร์ด</h1>
+    </div>
+  </div>
+
+  <!-- Stat cards (เฉพาะส่วนนี้ที่แก้: เปลี่ยนเป็นลิงก์ทั้งการ์ด + เอาปุ่มออก) -->
+  <section class="stat-grid" aria-label="ภาพรวมสถิติ">
+    <a class="stat-card" href="/admin/products" aria-label="ดูสินค้า">
+      <div class="stat-ico">📦</div>
+      <div class="stat-meta">
+        <span class="label">สินค้า</span>
+        <span class="value"><%= productCount %> รายการ</span>
+        <span class="stat-sub">จัดการสินค้า</span>
+      </div>
+    </a>
+
+    <a class="stat-card" href="/admin/orders" aria-label="ดูออเดอร์">
+      <div class="stat-ico">🧾</div>
+      <div class="stat-meta">
+        <span class="label">ออเดอร์</span>
+        <span class="value"><%= orderCount %> ออเดอร์</span>
+        <span class="stat-sub">ดูออเดอร์ทั้งหมด</span>
+      </div>
+    </a>
+
+    <a class="stat-card" href="/admin/portfolio" aria-label="ดูผลงาน">
+      <div class="stat-ico">🖼️</div>
+      <div class="stat-meta">
+        <span class="label">ผลงาน (Portfolio)</span>
+        <span class="value"><%= portfolioCount %> ชิ้นงาน</span>
+        <span class="stat-sub">เปิดดูแกลเลอรี</span>
+      </div>
+    </a>
+
+    <a class="stat-card" href="/admin/orders?status=PAID" aria-label="ดูรายได้">
+      <div class="stat-ico">💰</div>
+      <div class="stat-meta">
+        <span class="label">รายได้ (PAID)</span>
+        <span class="value">7 วัน: <%= revenue7.toLocaleString('th-TH', {minimumFractionDigits:2}) %> ฿</span>
+        <span class="stat-sub">30 วัน: <%= revenue30.toLocaleString('th-TH', {minimumFractionDigits:2}) %> ฿</span>
+      </div>
+    </a>
+  </section>
+
+  <!-- Action Center (เดิม) -->
+  <section class="admin-card" style="margin-top:var(--gap);">
+    <div class="card-title">งานที่ต้องทำ (Action Center)</div>
+    <div class="todo-grid">
+      <div class="todo-card">
+        <div>
+          <div class="todo-title">ออเดอร์รอตรวจสลิป</div>
+          <div class="todo-meta">สถานะ PENDING และมีสลิปแนบ</div>
+        </div>
+        <div class="admin-right" style="display:flex;align-items:center;gap:10px;">
+          <strong><%= pendingPaymentCount %></strong>
+          <a class="admin-btn" href="/admin/orders?status=PENDING">เปิดดู</a>
+        </div>
+      </div>
+
+      <div class="todo-card">
+        <div>
+          <div class="todo-title">ออเดอร์รอจัดส่ง</div>
+          <div class="todo-meta">สถานะ PAID</div>
+        </div>
+        <div class="admin-right" style="display:flex;align-items:center;gap:10px;">
+          <strong><%= toShipCount %></strong>
+          <a class="admin-btn" href="/admin/orders?status=PAID">เปิดดู</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Content: Left (wide) + Right (narrow) – ทั้งหมดเดิม -->
+  <section class="admin-grid" style="margin-top:var(--gap);">
+    <div class="admin-card">
+      <div class="card-title">กิจกรรมล่าสุด</div>
+
+      <div style="max-height:340px; overflow:auto; border:1px solid var(--border); border-radius:8px;">
+        <table class="mini-table" style="margin:0;">
+          <thead style="position:sticky;top:0;background:var(--panel);z-index:1;">
+            <tr>
+              <th style="width:48%;">รายการ</th>
+              <th style="width:22%;">หมวด</th>
+              <th style="width:16%;">การกระทำ</th>
+              <th style="width:14%;" class="td-right">เวลา</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% const hasLogs = Array.isArray(logs) && logs.length > 0; %>
+            <% if (!hasLogs) { %>
+              <tr><td colspan="4" style="text-align:center;">— ยังไม่มีกิจกรรม —</td></tr>
+            <% } else { %>
+              <% logs.forEach(l => { %>
+                <tr>
+                  <td>
+                    <div class="log-title"><%= l.message %></div>
+                    <% if (l.refId) { %><div class="log-meta">อ้างอิง: #<%= l.refId %></div><% } %>
+                  </td>
+                  <td>
+                    <span class="admin-chip"><span class="dot"></span><%= l.type %></span>
+                  </td>
+                  <td>
+                    <span class="admin-chip <%= l.action === 'deleted' ? 'admin-chip--danger' : (l.action === 'updated' ? 'admin-chip--warn' : 'admin-chip--ok') %>">
+                      <span class="dot"></span><%= l.action %>
+                    </span>
+                  </td>
+                  <td class="td-right">
+                    <time data-time="<%= l.createdAt?.toISOString ? l.createdAt.toISOString() : l.createdAt %>">
+                      <%= new Date(l.createdAt).toLocaleString('th-TH') %>
+                    </time>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="admin-muted" style="margin-top:8px;font-size:13px;">
+        * มาจากตาราง <code>ActivityLog</code> (เพิ่ม/แก้ไข/ลบ สินค้า, ผลงาน, ออเดอร์ และการเข้า/ออกระบบ)
+      </p>
+
+      <hr style="margin:14px 0; border:none; border-top:1px solid var(--border);" />
+
+      <div class="card-title" style="margin-top:0;">ออเดอร์ล่าสุด</div>
+      <div style="overflow:auto; border:1px solid var(--border); border-radius:8px;">
+        <table class="mini-table" style="margin:0;">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>ลูกค้า</th>
+              <th>สถานะ</th>
+              <th class="td-right">ยอด</th>
+              <th class="td-right">เวลา</th>
+              <th class="td-right">ดู</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (!recentOrders || recentOrders.length === 0) { %>
+              <tr><td colspan="6" style="text-align:center;">— ไม่มีข้อมูล —</td></tr>
+            <% } else { %>
+              <% recentOrders.forEach(o => { %>
+                <tr>
+                  <td><%= o.id %></td>
+                  <td><%= o.email %></td>
+                  <td>
+                    <span class="admin-chip <%= o.status === 'CANCELLED' ? 'admin-chip--danger' : (o.status === 'SHIPPED' ? 'admin-chip--ok' : (o.status === 'PAID' ? 'admin-chip--warn' : '')) %>">
+                      <span class="dot"></span><%= o.status %>
+                    </span>
+                  </td>
+                  <td class="td-right"><%= o.totalBaht.toLocaleString('th-TH', {minimumFractionDigits:2}) %> ฿</td>
+                  <td class="td-right"><%= new Date(o.createdAt).toLocaleString('th-TH') %></td>
+                  <td class="td-right"><a class="admin-btn admin-btn--soft" href="/admin/orders/<%= o.id %>">เปิด</a></td>
+                </tr>
+              <% }) %>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- RIGHT: Quick links + Low stock -->
+    <aside class="admin-card">
+      <div class="card-title">ทางลัด</div>
+      <div class="quick-list" style="display:flex; flex-direction:column; gap:10px;">
+        <div class="todo-card"><div>ออเดอร์ทั้งหมด</div><a href="/admin/orders" class="admin-btn">เปิด</a></div>
+        <div class="todo-card"><div>ออเดอร์รอตรวจสลิป (<%= pendingPaymentCount %>)</div><a href="/admin/orders?status=PENDING" class="admin-btn">เปิด</a></div>
+        <div class="todo-card"><div>ออเดอร์รอจัดส่ง (<%= toShipCount %>)</div><a href="/admin/orders?status=PAID" class="admin-btn">เปิด</a></div>
+        <div class="todo-card"><div>จัดการสินค้า</div><a href="/admin/products" class="admin-btn">เปิด</a></div>
+        <div class="todo-card"><div>จัดการสต็อก</div><a href="/admin/stock" class="admin-btn">เปิด</a></div>
+        <div class="todo-card"><div>จัดการหน่วยนับ</div><a href="/admin/units" class="admin-btn">เปิด</a></div>
+      </div>
+
+      <hr style="margin:14px 0; border:none; border-top:1px solid var(--border);" />
+
+      <div class="card-title" style="margin-top:0;">สต็อกใกล้หมด</div>
+      <div style="overflow:auto; border:1px solid var(--border); border-radius:8px;">
+        <table class="mini-table" style="margin:0;">
+          <thead>
+            <tr><th>สินค้า</th><th class="td-right">คงเหลือ</th><th class="td-right">จัดการ</th></tr>
+          </thead>
+          <tbody>
+            <% if (!lowStock || lowStock.length === 0) { %>
+              <tr><td colspan="3" style="text-align:center;">— ไม่มีสินค้าใกล้หมด —</td></tr>
+            <% } else { %>
+              <% lowStock.forEach(p => { %>
+                <tr>
+                  <td><a class="link-strong" href="/admin/products/<%= p.id %>/edit"><%= p.name %></a></td>
+                  <td class="td-right"><%= p.stockQty %></td>
+                  <td class="td-right"><a class="admin-btn admin-btn--soft" href="/admin/stock#prod-<%= p.id %>">ปรับสต๊อก</a></td>
+                </tr>
+              <% }) %>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </aside>
+  </section>
+
+</main>
+
+<script>
+  // relative time
+  (function(){
+    const els = document.querySelectorAll('time[data-time]');
+    const rtf = new Intl.RelativeTimeFormat('th-TH', { numeric: 'auto' });
+    const intervals = [
+      ['year',   1000*60*60*24*365],
+      ['month',  1000*60*60*24*30],
+      ['day',    1000*60*60*24],
+      ['hour',   1000*60*60],
+      ['minute', 1000*60],
+      ['second', 1000],
+    ];
+    function rel(d){
+      const diff = new Date(d).getTime() - Date.now();
+      const abs = Math.abs(diff);
+      for(const [unit, ms] of intervals){
+        if (abs >= ms || unit === 'second') return rtf.format(Math.round(diff/ms), unit);
+      }
+    }
+    els.forEach(el=>{
+      const iso = el.getAttribute('data-time');
+      el.title = new Date(iso).toLocaleString('th-TH');
+      el.textContent = rel(iso);
+    });
+  })();
+</script>
+
+<%- include('partials/foot') %>

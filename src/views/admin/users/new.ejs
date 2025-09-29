@@ -1,0 +1,40 @@
+<%- include('../partials/head', { title: 'เพิ่มผู้ใช้ • PFP' }) %>
+<main class="admin-main">
+  <nav class="admin-breadcrumbs"><a href="/admin">แดชบอร์ด</a> <span>/</span> <a href="/admin/users">ผู้ใช้</a> <span>/</span> เพิ่ม</nav>
+  <h1>เพิ่มผู้ใช้</h1>
+
+  <% if (errors) { %>
+    <div class="admin-alert admin-alert--danger"><%= errors %></div>
+  <% } %>
+
+  <form class="admin-form" method="post" action="/admin/users" style="max-width:520px;">
+    <div class="admin-field">
+      <label>ชื่อ</label>
+      <input type="text" name="name" value="<%= (values&&values.name)||'' %>" required>
+    </div>
+    <div class="admin-field">
+      <label>อีเมล</label>
+      <input type="email" name="email" value="<%= (values&&values.email)||'' %>" required>
+    </div>
+    <div class="admin-field">
+      <label>รหัสผ่าน</label>
+      <input type="password" name="password" minlength="6" required>
+      <div class="hint">อย่างน้อย 6 ตัวอักษร</div>
+    </div>
+    <div class="admin-field">
+      <label>Role</label>
+      <select name="role" required>
+        <% const r = (values&&values.role)||'CUSTOMER'; %>
+        <option value="ADMIN"    <%= r==='ADMIN'    ? 'selected':'' %>>ADMIN</option>
+        <option value="STAFF"    <%= r==='STAFF'    ? 'selected':'' %>>STAFF</option>
+        <option value="CUSTOMER" <%= r==='CUSTOMER' ? 'selected':'' %>>CUSTOMER</option>
+      </select>
+    </div>
+
+    <div class="admin-btn-group">
+      <button class="admin-btn" type="submit">บันทึก</button>
+      <a class="admin-btn admin-btn--soft" href="/admin/users">ยกเลิก</a>
+    </div>
+  </form>
+</main>
+<%- include('../partials/foot') %>

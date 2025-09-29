@@ -1,0 +1,250 @@
+<!-- src/views/admin/products/new.ejs -->
+<%- include('../partials/head', { title: 'เพิ่มสินค้า • PFP' }) %>
+
+<main class="admin-main">
+
+  <!-- Page Header -->
+  <div class="page-header admin-main">
+    <div>
+      <nav class="admin-breadcrumbs" aria-label="Breadcrumb">
+        <a href="/admin">แดชบอร์ด</a>
+        <span>/</span>
+        <a href="/admin/products">สินค้า</a>
+        <span>/</span>
+        <span>เพิ่มสินค้า</span>
+      </nav>
+      <h1 style="margin:6px 0 0;">เพิ่มสินค้า</h1>
+      <% if (typeof createdAt === 'string') { %>
+        <p class="admin-muted" style="margin:6px 0 0;">สร้างรายการใหม่</p>
+      <% } %>
+    </div>
+    <div class="admin-btn-group">
+      <a href="/admin/products" class="admin-btn admin-btn--soft">← กลับไปหน้ารายการ</a>
+    </div>
+  </div>
+
+  <!-- แจ้งข้อผิดพลาด (ถ้ามี) -->
+  <% if (errors) { %>
+    <section class="admin-card" style="max-width: 920px; margin: 0 auto; border-color: color-mix(in oklab, var(--danger) 28%, var(--border));">
+      <div class="admin-chip admin-chip--danger" style="margin-bottom:8px;">
+        <span class="dot"></span>เกิดข้อผิดพลาด
+      </div>
+      <div style="color:var(--danger-600);">
+        <% if (Array.isArray(errors)) { errors.forEach(e => { %>
+          <div>• <%= e %></div>
+        <% }) } else { %>
+          <div><%= errors %></div>
+        <% } %>
+      </div>
+    </section>
+  <% } %>
+
+  <!-- Form Card -->
+  <section class="admin-card" style="max-width: 920px; margin: 0 auto;">
+
+    <form method="post"
+          action="/admin/products"
+          enctype="multipart/form-data"
+          style="display:grid; gap:16px;">
+
+      <!-- CSRF -->
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+      <%
+        // ===== ค่าตั้งต้นสำหรับ sticky form =====
+        const v = (typeof values === 'object' && values) ? values : {};
+        const selectedCats = Array.isArray(v.categoryIds) ? v.categoryIds.map(String) : [];
+        const primaryCatId = v.primaryCategoryId != null ? String(v.primaryCategoryId) : '';
+        // ช่วยทำ label เว้นระดับ (ถ้าส่ง level มาจาก server)
+        function catLabel(c){
+          const lvl = Number(c.level || 0);
+          let prefix = '';
+          for (let i=0;i<lvl;i++) prefix += '— ';
+          return prefix + c.name;
+        }
+        // ให้แน่ใจว่ามี array categories เสมอ
+        const catList = Array.isArray(categories) ? categories : [];
+      %>
+
+      <!-- ชื่อสินค้า -->
+      <div class="admin-form-group">
+        <label class="admin-label" for="name">ชื่อสินค้า</label>
+        <input id="name" name="name" required class="admin-input"
+               value="<%= v.name || '' %>"
+               placeholder="เช่น ปั๊มน้ำแรงดันสูง รุ่น X200" />
+      </div>
+
+      <!-- Slug + SKU + ราคา -->
+      <div class="admin-form-grid-3">
+        <div class="admin-form-group">
+          <label class="admin-label" for="slug">Slug</label>
+          <input id="slug" name="slug" class="admin-input"
+                 value="<%= v.slug || '' %>"
+                 placeholder="เช่น x200-high-pressure-pump" />
+        </div>
+
+        <div class="admin-form-group">
+          <label class="admin-label" for="sku">SKU</label>
+          <input id="sku" name="sku" class="admin-input"
+                 value="<%= v.sku || '' %>"
+                 placeholder="เช่น X200-HP-TH" />
+        </div>
+
+        <div class="admin-form-group">
+          <label class="admin-label" for="priceBaht">ราคา (บาท)</label>
+          <div class="admin-input-group">
+            <span class="affix">฿</span>
+            <input id="priceBaht" name="priceBaht" class="admin-input"
+                   type="number" step="0.01" min="0"
+                   value="<%= (v.priceBaht != null ? v.priceBaht : '') %>"
+                   placeholder="0.00" />
+          </div>
+        </div>
+      </div>
+
+      <!-- หน่วยนับ -->
+      <div class="admin-field">
+        <label>หน่วยนับ</label>
+        <select class="admin-select" name="unitId">
+          <option value="">— เลือกหน่วย —</option>
+          <% (units || []).forEach(u => { %>
+            <option value="<%= u.id %>" <%= String(v.unitId || '') === String(u.id) ? 'selected' : '' %>>
+              <%= u.name %><%= u.shortName ? ' ('+u.shortName+')' : '' %>
+            </option>
+          <% }) %>
+        </select>
+        <div class="hint">หากยังไม่มี ไปเพิ่มที่ “หน่วยนับ” ในเมนูหลังบ้าน</div>
+      </div>
+
+      <!-- ===================== หมวดหมู่สินค้า (ใหม่) ===================== -->
+      <div class="admin-grid-2" style="gap:14px;">
+        <!-- หมวดหลัก -->
+        <div class="admin-field">
+          <label>หมวดหลัก (ใช้แสดงหน้าแคตตาล็อก/กรองหลัก)</label>
+          <select class="admin-select" name="primaryCategoryId">
+            <option value="">— เลือกหมวดหลัก —</option>
+            <% catList.forEach(c => { %>
+              <option value="<%= c.id %>" <%= primaryCatId === String(c.id) ? 'selected' : '' %>><%= catLabel(c) %></option>
+            <% }) %>
+          </select>
+          <div class="hint">ไม่บังคับเลือก แต่แนะนำให้ตั้งเพื่อการค้นหา/จัดหมวดที่ง่ายขึ้น</div>
+        </div>
+
+        <!-- หมวดเพิ่มเติม (หลายตัว) -->
+        <div class="admin-field">
+          <label>หมวดหมู่เพิ่มเติม <span class="admin-muted">(เลือกได้หลายรายการ)</span></label>
+          <select class="admin-select" id="categoryIds" name="categoryIds[]" multiple size="6">
+            <% catList.forEach(c => { %>
+              <option value="<%= c.id %>" <%= selectedCats.includes(String(c.id)) ? 'selected' : '' %>><%= catLabel(c) %></option>
+            <% }) %>
+          </select>
+          <div class="hint">กด Ctrl/Command + คลิก เพื่อเลือกหลายรายการ</div>
+        </div>
+      </div>
+      <!-- =============================================================== -->
+
+      <!-- อัปโหลดรูปภาพ -->
+      <div class="admin-form-group">
+        <label class="admin-label">รูปภาพสินค้า</label>
+
+        <!-- Dropzone/Picker -->
+        <div id="dropzone" class="admin-dropzone" tabindex="0" role="button" aria-label="อัปโหลดรูปภาพ">
+          <div class="dz-icon">🖼️</div>
+          <div class="dz-text">ลากรูปมาวางหรือคลิกเพื่อเลือกไฟล์</div>
+          <div class="dz-subtext">PNG / JPG / WebP / GIF ≤ 5MB</div>
+          <input id="imageFile" name="imageFile" type="file" accept="image/*" style="display:none" />
+        </div>
+
+        <!-- Current + Preview -->
+        <div class="admin-media-duo" style="margin-top:12px; display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div class="admin-preview">
+            <div class="admin-muted" style="margin-bottom:6px;">รูปปัจจุบัน</div>
+            <div class="admin-muted" style="border:1px dashed var(--border); border-radius:12px; padding:16px; text-align:center;">
+              ยังไม่มีรูป (จะเห็นรูปหลังบันทึกแล้วแก้ไข)
+            </div>
+          </div>
+
+          <div class="admin-preview">
+            <div class="admin-muted" style="margin-bottom:6px;">ตัวอย่างรูปใหม่</div>
+            <img id="preview" src="" alt=""
+                 style="display:none; max-height:180px; width:auto; border-radius:12px; box-shadow:var(--shadow); border:1px solid var(--border); background:#fff; padding:6px;">
+          </div>
+        </div>
+      </div>
+
+      <!-- รายละเอียด -->
+      <div class="admin-form-group">
+        <label class="admin-label" for="description">รายละเอียด</label>
+        <textarea id="description" name="description" class="admin-textarea" rows="6"
+                  placeholder="ระบุรายละเอียด ข้อมูลสเปก หรือคำอธิบายสินค้า"><%= v.description || '' %></textarea>
+      </div>
+
+      <!-- Actions -->
+      <div class="admin-form-actions">
+        <button class="admin-btn admin-btn--lg" type="submit">บันทึกสินค้า</button>
+        <a href="/admin/products" class="admin-btn admin-btn--soft admin-btn--lg">ยกเลิก</a>
+      </div>
+    </form>
+  </section>
+</main>
+
+<script>
+  (function () {
+    // ===== Dropzone preview =====
+    const dz = document.getElementById('dropzone');
+    const picker = document.getElementById('imageFile');
+    const preview = document.getElementById('preview');
+
+    function showPreview(file) {
+      if (!file) {
+        preview.style.display = 'none';
+        preview.src = '';
+        return;
+      }
+      if (!file.type || !file.type.startsWith('image/')) { alert('ไฟล์ต้องเป็นรูปภาพเท่านั้น'); return; }
+      if (file.size > 5 * 1024 * 1024) { alert('ไฟล์ใหญ่เกิน 5MB'); return; }
+      const url = URL.createObjectURL(file);
+      preview.src = url;
+      preview.style.display = 'block';
+    }
+
+    dz.addEventListener('click', () => picker.click());
+    dz.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); picker.click(); }
+    });
+
+    picker.addEventListener('change', () => {
+      const f = picker.files?.[0];
+      showPreview(f);
+    });
+
+    // Drag & drop
+    ['dragenter','dragover'].forEach(evt =>
+      dz.addEventListener(evt, (e) => { e.preventDefault(); e.stopPropagation(); dz.classList.add('is-dragover'); })
+    );
+    ['dragleave','drop'].forEach(evt =>
+      dz.addEventListener(evt, (e) => { e.preventDefault(); e.stopPropagation(); dz.classList.remove('is-dragover'); })
+    );
+    dz.addEventListener('drop', (e) => {
+      const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+      if (f) {
+        picker.files = e.dataTransfer.files;
+        showPreview(f);
+      }
+    });
+
+    // ===== UX: แสดงจำนวนที่เลือกใน multiple select (หมวดหมู่เพิ่มเติม) =====
+    const multi = document.getElementById('categoryIds');
+    if (multi) {
+      const hint = multi.parentElement.querySelector('.hint');
+      const update = () => {
+        const count = Array.from(multi.options).filter(o => o.selected).length;
+        if (hint) hint.innerHTML = (count ? `เลือกแล้ว ${count} รายการ · ` : '') + 'กด Ctrl/Command + คลิก เพื่อเลือกหลายรายการ';
+      };
+      multi.addEventListener('change', update);
+      update();
+    }
+  })();
+</script>
+
+<%- include('../partials/foot') %>

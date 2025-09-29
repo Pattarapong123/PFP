@@ -1,0 +1,177 @@
+<footer class="container">
+  <p>© <span id="year"></span> PFP ENGINEERING</p>
+</footer>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+
+<!-- ===== Contact Widget (floating chat menu) ===== -->
+<style>
+  :root{
+    --cw-primary: var(--primary, #0aaee4);
+    --cw-panel:   var(--panel, #fff);
+    --cw-text:    var(--text, #111827);
+    --cw-muted:   var(--muted, #6b7280);
+    --cw-border:  var(--border, #e5e7eb);
+  }
+  .cw{ position:fixed; right:16px; bottom:16px; z-index:1100; font-family:inherit; }
+  .cw *{ box-sizing:border-box; }
+  .cw-btn{
+    width:56px; height:56px; border-radius:50%;
+    display:inline-flex; align-items:center; justify-content:center;
+    color:#fff; background:var(--cw-primary);
+    box-shadow: 0 12px 30px rgba(0,0,0,.22);
+    border:1px solid color-mix(in oklab, var(--cw-primary) 60%, #0000);
+    cursor:pointer; transition:.18s transform, .18s box-shadow, .18s background;
+  }
+  .cw-btn:hover{ transform:translateY(-2px); box-shadow:0 16px 36px rgba(0,0,0,.28); }
+  .cw-btn:active{ transform:translateY(-1px) scale(.98); }
+  .cw-hint{
+    position:absolute; right:70px; bottom:8px;
+    background:var(--cw-panel); color:var(--cw-text);
+    border:1px solid var(--cw-border); border-radius:18px;
+    padding:10px 14px; box-shadow:0 10px 24px rgba(16,24,40,.12);
+    white-space:nowrap; max-width:60vw;
+    transform:translateY(6px); opacity:0; pointer-events:none;
+    transition:.28s transform, .28s opacity;
+  }
+  .cw-hint::after{
+    content:""; position:absolute; right:-8px; bottom:12px;
+    border:8px solid transparent; border-left-color:var(--cw-panel);
+    filter: drop-shadow(0 0 0 var(--cw-border));
+  }
+  .cw.show-hint .cw-hint{ transform:none; opacity:1; }
+  .cw-menu{
+    position:absolute; right:0; bottom:70px; display:grid; gap:10px;
+    transform: translateY(8px) scale(.98); transform-origin: 100% 100%;
+    opacity:0; pointer-events:none; transition:.18s transform,.18s opacity;
+  }
+  .cw.is-open .cw-menu{ transform:none; opacity:1; pointer-events:auto; }
+  .cw-item{
+    display:grid; grid-template-columns: 1fr auto; align-items:center; gap:10px;
+    background:var(--cw-panel); color:var(--cw-text);
+    border:1px solid var(--cw-border); border-radius:14px;
+    padding:10px 12px; min-width:230px;
+    box-shadow:0 10px 24px rgba(16,24,40,.10);
+    text-decoration:none; font-weight:700;
+    transition:.18s transform,.18s box-shadow,.18s border-color,.18s background;
+  }
+  .cw-item:hover{
+    transform: translateY(-2px);
+    border-color: color-mix(in oklab, var(--cw-primary) 26%, var(--cw-border));
+    box-shadow:0 16px 34px rgba(16,24,40,.16);
+  }
+  .cw-item .meta{ font-weight:600; font-size:12px; color:var(--cw-muted); }
+  .cw-icon{
+    width:42px; height:42px; border-radius:50%;
+    display:inline-flex; align-items:center; justify-content:center;
+    color:#fff; box-shadow: inset 0 0 0 1px #00000014;
+  }
+  .cw-icon.line{  background:#06C755; }
+  .cw-icon.mail{  background:#b86a00; }
+  .cw-icon.phone{ background:#0ea5a5; }
+  .cw-badge{
+    justify-self:end; color:var(--cw-muted); font-size:11px; font-weight:700;
+    background: color-mix(in oklab, var(--cw-primary) 8%, transparent);
+    border:1px solid var(--cw-border); border-radius:999px; padding:4px 8px;
+  }
+  @media (max-width:520px){
+    .cw{ right:12px; bottom:12px; }
+    .cw-item{ min-width: 210px; }
+  }
+  @media (prefers-color-scheme: dark){
+    .cw-hint{ box-shadow:0 10px 26px rgba(0,0,0,.35); }
+    .cw-item{ box-shadow:0 10px 26px rgba(0,0,0,.28); }
+  }
+</style>
+
+<div id="contactWidget"
+     class="cw"
+     data-line="https://line.me/R/ti/p/~pfpengineering"
+     data-form="/contact"
+     data-phone="099-135-1328"
+     data-mail="pfp.service01@gmail.com"
+     data-badge="Powered by PFP">
+
+  <div class="cw-hint">ติดต่อเราที่นี่ได้เลยค่ะ</div>
+  <div class="cw-menu" role="menu" aria-label="เมนูติดต่อ"></div>
+
+  <button class="cw-btn" type="button" aria-expanded="false" aria-controls="cwMenu" aria-label="ติดต่อเรา">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M21 12a8 8 0 0 1-8 8H8l-5 3V12a8 8 0 0 1 8-8h2a8 8 0 0 1 8 8Z"
+            stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+    </svg>
+  </button>
+</div>
+
+<script>
+(function(){
+  var root = document.getElementById('contactWidget');
+  if(!root) return;
+
+  var cfg = {
+    line:  root.dataset.line  || '',
+    form:  root.dataset.form  || '',
+    phone: root.dataset.phone || '',
+    mail:  root.dataset.mail  || '',
+    badge: root.dataset.badge || ''
+  };
+
+  var menu = root.querySelector('.cw-menu');
+  function iconSVG(type){
+    if(type==='line')  return '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.5 3h-15A2.5 2.5 0 0 0 2 5.5v8A2.5 2.5 0 0 0 4.5 16H7v4l5.2-4H19.5A2.5 2.5 0 0 0 22 13.5v-8A2.5 2.5 0 0 0 19.5 3Z"/><path d="M4 4l8 7 8-7"/></svg>';
+    if(type==='mail')  return '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm0 0 8 7 8-7"/></svg>';
+    if(type==='phone') return '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.8 19.8 0 0 1 3.11 5.18 2 2 0 0 1 5.09 3h3a2 2 0 0 1 2 1.72c.12.9.3 1.78.55 2.63a2 2 0 0 1-.45 2.11L9 11a16 16 0 0 0 6 6l1.54-1.19a2 2 0 0 1 2.11-.45c.85.25 1.73.43 2.63.55A2 2 0 0 1 22 16.92Z"/></svg>';
+    return '';
+  }
+  function addItem({href,label,meta,cls,target}){
+    var a = document.createElement('a');
+    a.className = 'cw-item';
+    a.href = href; a.target = target || '_blank'; a.rel = 'noopener';
+    a.setAttribute('role','menuitem');
+    a.innerHTML =
+      '<div><div>'+label+'</div>' +
+        (meta ? '<div class="meta">'+meta+'</div>' : '') +
+      '</div>' +
+      '<span class="cw-icon '+cls+'">'+iconSVG(cls.replace('icon-',''))+'</span>';
+    menu.appendChild(a);
+  }
+
+  if(cfg.line)  addItem({href: cfg.line, label:'พูดคุยผ่าน Line', meta:'ตอบไวในเวลาทำการ', cls:'line'});
+  if(cfg.form)  addItem({href: cfg.form, label:'ฝากข้อมูลเพิ่มเติม', meta:'เราติดต่อกลับโดยเร็ว', cls:'mail'});
+  if(cfg.phone){
+    var tel = cfg.phone.replace(/\s+/g,'');
+    addItem({href:'tel:'+tel, label:'โทรหาเรา', meta: cfg.phone, cls:'phone', target:'_self'});
+  }
+  if(cfg.mail)  addItem({href:'mailto:'+cfg.mail, label:'อีเมลหาเรา', meta: cfg.mail, cls:'mail', target:'_self'});
+
+  if(cfg.badge){
+    var badge = document.createElement('div');
+    badge.className = 'cw-badge';
+    badge.textContent = cfg.badge;
+    menu.appendChild(badge);
+  }
+
+  var btn  = root.querySelector('.cw-btn');
+  function open(){ root.classList.add('is-open'); btn.setAttribute('aria-expanded','true'); }
+  function close(){ root.classList.remove('is-open'); btn.setAttribute('aria-expanded','false'); }
+  btn.addEventListener('click', function(){
+    root.classList.contains('is-open') ? close() : open();
+  });
+  document.addEventListener('click', function(e){ if(!root.contains(e.target)) close(); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') close(); });
+
+  try{
+    var key='cw_hint_at';
+    var last = parseInt(localStorage.getItem(key)||'0',10);
+    var now  = Date.now();
+    if(!last || now-last > 3*24*60*60*1000){
+      root.classList.add('show-hint');
+      setTimeout(function(){ root.classList.remove('show-hint'); }, 4200);
+      localStorage.setItem(key, String(now));
+    }
+  }catch(_e){}
+})();
+</script>
+<!-- ===== /Contact Widget ===== -->

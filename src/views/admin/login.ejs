@@ -1,0 +1,49 @@
+<%- include('partials/head', { title: 'เข้าสู่ระบบแอดมิน • PFP' }) %>
+
+<div class="card" style="max-width:460px;margin:0 auto;">
+  <h2 style="margin:0 0 10px;">เข้าสู่ระบบแอดมิน</h2>
+
+  <% if (typeof error !== 'undefined' && error) { %>
+    <div style="color:#c0392b;margin:8px 0 14px"><%= error %></div>
+  <% } %>
+
+  <form method="post" action="/admin/login" style="display:grid;gap:12px">
+    <!-- CSRF token -->
+    <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+    <input type="hidden" name="next" value="<%= (typeof next !== 'undefined' && next) ? next : '/admin' %>">
+
+    <div>
+      <label for="email" style="display:block;margin-bottom:6px;color:var(--muted)">อีเมล</label>
+      <input id="email" type="email" name="email" required placeholder=""
+             value="<%= (typeof values !== 'undefined' && values && values.email) ? values.email : '' %>"
+             style="width:100%" autocomplete="username" autofocus />
+    </div>
+
+    <div>
+      <label for="password" style="display:block;margin-bottom:6px;color:var(--muted)">รหัสผ่าน</label>
+      <div style="position:relative">
+        <input id="password" type="password" name="password" required placeholder=""
+               style="width:100%" autocomplete="current-password" />
+        <span id="togglePass" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:.9em;color:var(--muted)">แสดง</span>
+      </div>
+    </div>
+
+    <button class="btn">เข้าสู่ระบบ</button>
+  </form>
+</div>
+
+<%- include('partials/foot') %>
+
+<script>
+  (function () {
+    const $btn = document.getElementById('togglePass');
+    const $inp = document.getElementById('password');
+    if ($btn && $inp) {
+      $btn.addEventListener('click', () => {
+        const isPwd = $inp.type === 'password';
+        $inp.type = isPwd ? 'text' : 'password';
+        $btn.textContent = isPwd ? 'ซ่อน' : 'แสดง';
+      });
+    }
+  })();
+</script>

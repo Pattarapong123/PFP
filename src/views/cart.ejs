@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>ตะกร้า - PFP ENGINEERING</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="icon" type="images/jpeg" href="/images/logo2.jpg">
+  <style>
+    /* thumbnail ในตะกร้า */
+    .cart-item {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .cart-thumb {
+      width: 64px; height: 64px;
+      object-fit: cover;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fff;
+      box-shadow: var(--shadow);
+      flex: 0 0 auto;
+    }
+    .cart-name {
+      display:block; font-weight: 700; line-height: 1.3;
+    }
+    .cart-meta { color: var(--muted); font-size: 12px; }
+    @media (max-width: 720px){
+      .cart-thumb{ width: 56px; height: 56px; }
+    }
+  </style>
+</head>
+<body>
+
+  <%- include('partials/header') %>
+
+  <main class="container" style="padding:24px 0;">
+    <h1>ตะกร้าสินค้า</h1>
+
+    <% if (!cart || cart.length === 0) { %>
+      <div class="card">ตะกร้าว่างอยู่ ลองเลือกดู <a href="/products">สินค้า</a> สิ!</div>
+    <% } else { %>
+
+      <!-- รายการสินค้า -->
+      <table class="table cart-table">
+        <thead>
+          <tr>
+            <th>สินค้า</th>
+            <th style="width:120px; text-align:center;">จำนวน</th>
+            <th style="width:160px; text-align:right;">ราคา/ชิ้น</th>
+            <th style="width:160px; text-align:right;">รวม</th>
+            <th style="width:110px; text-align:center;"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% cart.forEach(i => { %>
+            <tr>
+              <td>
+                <div class="cart-item">
+                  <img
+                    class="cart-thumb"
+                    src="<%= i.imageUrl || '/images/placeholder.jpg' %>"
+                    alt="<%- i.name %>"
+                    loading="lazy"
+                  />
+                  <div>
+                    <a class="cart-name link-strong" href="/products/<%= i.slug %>">
+                      <%- i.name %>
+                    </a>
+                    <% if (i.sku) { %>
+                      <span class="cart-meta">SKU: <%- i.sku %></span>
+                    <% } %>
+                  </div>
+                </div>
+              </td>
+              <td style="text-align:center;"><%= i.qty %></td>
+              <td style="text-align:right;"><%= Number(i.price).toLocaleString('th-TH') %></td>
+              <td style="text-align:right;"><%= Number(i.price * i.qty).toLocaleString('th-TH') %></td>
+              <td style="text-align:center;">
+                <form method="post" action="/cart/remove" class="inline"
+                      onsubmit="return confirm('ลบสินค้านี้ออกจากตะกร้า?');">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <input type="hidden" name="productId" value="<%= i.id %>">
+                  <button type="submit" class="btn btn-sm btn-danger btn-pill" aria-label="ลบ <%= i.name %>">
+                    ลบ
+                  </button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+
+      <!-- Action Bar -->
+      <section class="actions-bar">
+        <div class="actions-left">
+          <a href="/products" class="btn btn-outline btn-lg btn-eq">
+            เลือกสินค้าต่อ
+          </a>
+          <form method="post" action="/cart/clear" class="inline"
+                onsubmit="return confirm('ต้องการลบสินค้าทั้งหมดจากตะกร้าใช่ไหม?');">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <button type="submit" class="btn btn-danger btn-lg btn-eq">
+              ลบทั้งหมด
+            </button>
+          </form>
+        </div>
+
+        <div class="actions-right">
+          <div class="order-total">
+            ยอดรวม: <strong><%= Number(total).toLocaleString('th-TH') %></strong> บาท
+          </div>
+          <form method="post" action="/checkout" class="inline">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <button class="btn btn-primary btn-lg">
+              ยืนยันการสั่งซื้อ
+            </button>
+          </form>
+        </div>
+      </section>
+
+    <% } %>
+  </main>
+
+  <%- include('partials/footer') %>
+</body>
+</html>

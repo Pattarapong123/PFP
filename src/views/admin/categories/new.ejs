@@ -1,0 +1,31 @@
+<%- include('../partials/head', { title: 'เพิ่มหมวดหมู่ • Admin' }) %>
+<main class="admin-main">
+  <nav class="admin-breadcrumbs"><a href="/admin">แดชบอร์ด</a> <span>/</span> <a href="/admin/categories">หมวดหมู่</a> <span>/</span> เพิ่ม</nav>
+  <h1>เพิ่มหมวดหมู่</h1>
+
+  <% if (errors) { %>
+    <div class="admin-alert admin-alert--danger"><%= errors %></div>
+  <% } %>
+
+  <section class="admin-card" style="max-width:560px;">
+    <form class="admin-form" method="post" action="/admin/categories">
+      <div class="admin-field">
+        <label>ชื่อหมวดหมู่</label>
+        <input class="admin-input" name="name" value="<%= values?.name || '' %>" required>
+      </div>
+      <div class="admin-field">
+        <label>Slug <span class="admin-muted">(ปล่อยว่างให้ระบบสร้างอัตโนมัติได้)</span></label>
+        <input class="admin-input" name="slug" value="<%= values?.slug || '' %>">
+      </div>
+      <div class="admin-field">
+        <label>คำอธิบาย</label>
+        <textarea class="admin-textarea" name="description" rows="3"><%= values?.description || '' %></textarea>
+      </div>
+      <div class="admin-btn-group">
+        <button class="admin-btn" type="submit">บันทึก</button>
+        <a class="admin-btn admin-btn--ghost" href="/admin/categories">ยกเลิก</a>
+      </div>
+    </form>
+  </section>
+</main>
+<%- include('../partials/foot') %>

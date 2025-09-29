@@ -1,0 +1,267 @@
+<!-- src/views/admin/stock/index.ejs -->
+<%- include('../partials/head', { title: 'สต๊อกสินค้า • Admin' }) %>
+
+<style>
+  /* ===== Header ===== */
+  .page-header{
+    display:flex; align-items:end; justify-content:space-between;
+    gap:16px; margin: 8px 0 14px;
+  }
+  .page-header h1{ margin:0; line-height:1.15; }
+  .page-sub{ color:var(--muted); }
+
+  /* ===== Card & Table ===== */
+  .stock-card{
+    padding:0; border-radius: var(--radius);
+    overflow:hidden; border:1px solid var(--border); background:var(--panel);
+    box-shadow: var(--shadow);
+  }
+  .table-scroller{ overflow:auto; }
+
+  table.stock-table{ width:100%; border-collapse:separate; border-spacing:0; }
+  .stock-table thead th{
+    position: sticky; top:0; z-index:2;
+    background: color-mix(in oklab, var(--panel) 85%, #fff);
+    text-transform:none; letter-spacing:0; font-weight:800; color:var(--muted);
+    padding:12px; border-bottom:1px solid var(--border);
+  }
+  .stock-table th, .stock-table td{
+    padding:14px 12px; text-align:center; vertical-align:middle;
+    border-bottom:1px solid var(--border);
+  }
+  .stock-table tbody tr:hover{ background: color-mix(in oklab, var(--primary) 6%, transparent); }
+  .stock-table tbody tr:nth-child(even){ background: color-mix(in oklab, var(--neutral) 3%, transparent); }
+  .stock-table tbody tr:nth-child(even):hover{ background: color-mix(in oklab, var(--primary) 7%, transparent); }
+
+  /* Col widths for balance */
+  .col-id   { width:72px; }
+  .col-item { width:auto; text-align:left; }
+  .col-left { text-align:left; }
+  .col-qty  { width:160px; }
+  .col-unit { width:220px; }
+  .col-act  { width:520px; }
+
+  /* Product cell */
+  .p-name{ font-weight:900; line-height:1.35; }
+  .p-sub{ color:var(--muted); font-size:12px; }
+
+  /* Stock chip */
+  .chip{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:8px 12px; border-radius:999px; line-height:1;
+    border:1px solid var(--border); background:#fff; font-weight:900;
+    min-width:96px; justify-content:center; font-variant-numeric: tabular-nums;
+  }
+  .dot{ width:8px; height:8px; border-radius:50%; background:currentColor; }
+  .ok   { color: var(--success-600); }
+  .low  { color: var(--warning-600); }
+  .out  { color: var(--danger-600); }
+
+  /* Unit chip */
+  .unit-chip{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:8px 12px; border-radius:999px; line-height:1;
+    border:1px solid var(--border); background:var(--panel);
+    color:var(--muted); font-weight:700; max-width:100%;
+  }
+
+  /* Row actions (inline form) */
+  .row-form{
+    display:flex; align-items:center; justify-content:flex-end;
+    gap:10px; flex-wrap:wrap;
+  }
+  .row-form .admin-select,
+  .row-form .admin-input{ max-width:130px; }
+  .row-form .qty-group{ display:inline-flex; align-items:center; gap:6px; }
+  .row-form .qty{
+    width:100px; text-align:center; font-weight:800;
+  }
+  .row-form .nudger{
+    display:inline-flex; align-items:center; gap:6px; flex-wrap:wrap;
+  }
+  .row-form .nudger .pill{
+    padding:6px 10px; border-radius:999px; line-height:1; border:1px solid var(--border);
+    background: var(--neutral-50); color:var(--text); font-weight:800; font-size:12px; cursor:pointer;
+  }
+  .row-form .nudger .pill:hover{ background: color-mix(in oklab, var(--primary) 14%, var(--neutral-50)); }
+
+  .row-form .toggle{
+    display:inline-flex; border:1px solid var(--border); border-radius:10px; overflow:hidden;
+  }
+  .row-form .toggle button{
+    padding:8px 12px; border:0; background:transparent; cursor:pointer; font-weight:800;
+  }
+  .row-form .toggle button.is-on{ background: var(--primary-50); color: var(--primary-700); border-right:1px solid var(--border); }
+  .row-form .toggle button:last-child{ border-left:1px solid var(--border); }
+
+  .row-form .reason{ max-width:260px; flex:1 1 200px; }
+  .row-form .submit{ padding:10px 14px; }
+
+  /* Empty */
+  .empty{ padding:40px 16px; color:var(--muted); text-align:center; }
+
+  /* Sticky head subtle shadow when scrolled */
+  .table-scroller:has(thead){ --shadowTop: 0; }
+  .table-scroller{ position:relative; }
+  .table-scroller::after{
+    content:""; position:sticky; top:0; display:block; height:0; box-shadow:0 6px 10px rgba(0,0,0,.06);
+  }
+
+  /* ===== Responsive ===== */
+  @media (max-width: 1020px){
+    .col-act{ width:480px; }
+  }
+  @media (max-width: 900px){
+    .col-unit{ display:none; }
+    .col-qty{ width:150px; }
+    .col-act{ width:420px; }
+    .row-form .admin-select, .row-form .admin-input{ flex:1 1 120px; }
+  }
+  @media (max-width: 720px){
+    .col-act{ width:360px; }
+    .row-form{ justify-content:stretch }
+    .row-form .reason{ min-width: 140px; }
+  }
+</style>
+
+<main class="admin-main">
+  <div class="page-header">
+    <div>
+      <h1>สต๊อกสินค้า</h1>
+      <div class="page-sub">ปรับเพิ่ม/ลดสต๊อกอย่างรวดเร็วพร้อมบันทึกเหตุผล • ตัวเลขจัดรูปแบบอ่านง่าย</div>
+    </div>
+  </div>
+
+  <section class="stock-card">
+    <div class="table-scroller">
+      <table class="stock-table">
+        <colgroup>
+          <col class="col-id">
+          <col class="col-item">
+          <col class="col-qty">
+          <col class="col-unit">
+          <col class="col-act">
+        </colgroup>
+
+        <thead>
+          <tr>
+            <th>#</th>
+            <th class="col-left">สินค้า</th>
+            <th>คงเหลือ</th>
+            <th>หน่วย</th>
+            <th>ปรับสต๊อก</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <% if (!products || products.length === 0) { %>
+            <tr>
+              <td colspan="5">
+                <div class="empty">
+                  <div class="admin-skeleton" style="max-width:360px;margin:0 auto 10px;"></div>
+                  ยังไม่มีสินค้าในระบบ
+                </div>
+              </td>
+            </tr>
+          <% } %>
+
+          <% (products || []).forEach(p => {
+               const qty = Number.isFinite(p.stockQty) ? p.stockQty : 0;
+               const badge = qty <= 0 ? 'out' : (qty <= 5 ? 'low' : 'ok');
+               const unitText = p.unit ? (p.unit.name + (p.unit.shortName ? ' ('+p.unit.shortName+')' : '')) : '-';
+          %>
+            <tr>
+              <td><strong><%= p.id %></strong></td>
+
+              <td class="col-left">
+                <div class="p-name"><%= p.name %></div>
+                <% if (p.sku) { %>
+                  <div class="p-sub">SKU: <%= p.sku %></div>
+                <% } %>
+              </td>
+
+              <td>
+                <span class="chip <%= badge %>">
+                  <span class="dot"></span>
+                  <%= qty %>
+                </span>
+              </td>
+
+              <td>
+                <span class="unit-chip"><%= unitText %></span>
+              </td>
+
+              <td>
+                <form class="row-form" method="post" action="/admin/products/<%= p.id %>/stock" onsubmit="return validateRow(this)">
+                  <!-- CSRF -->
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+                  <!-- สลับ เพิ่ม / ลด -->
+                  <div class="toggle" role="group" aria-label="โหมดการปรับ">
+                    <button type="button" class="is-on" data-mode="add" onclick="toggleMode(this)">เพิ่ม (+)</button>
+                    <button type="button" data-mode="remove" onclick="toggleMode(this)">ลด (-)</button>
+                  </div>
+                  <input type="hidden" name="action" value="add">
+
+                  <!-- จำนวน + ปุ่ม nudger -->
+                  <div class="qty-group">
+                    <input class="admin-input qty" type="number" min="1" name="qty" value="1" inputmode="numeric" aria-label="จำนวน">
+                    <div class="nudger" aria-hidden="true">
+                      <button type="button" class="pill" onclick="nudge(this,1)">+1</button>
+                      <button type="button" class="pill" onclick="nudge(this,5)">+5</button>
+                      <button type="button" class="pill" onclick="nudge(this,10)">+10</button>
+                    </div>
+                  </div>
+
+                  <!-- เหตุผล (พร้อม datalist ให้เลือกเร็ว) -->
+                  <input class="admin-input reason" type="text" name="reason" list="reasonOptions" placeholder="เหตุผล เช่น รับเข้า/ขาย/เคลม/ปรับยอด">
+                  <datalist id="reasonOptions">
+                    <option value="รับสินค้าเข้า (GRN)"></option>
+                    <option value="ขายหน้าเว็บ"></option>
+                    <option value="คืนลูกค้า / เคลม"></option>
+                    <option value="ปรับยอดตรวจนับ"></option>
+                    <option value="ยืมใช้งานภายใน"></option>
+                  </datalist>
+
+                  <button class="admin-btn admin-btn--sm submit" type="submit">ยืนยัน</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<script>
+  // Toggle เพิ่ม/ลด (ไม่แตะ route/field backend — คงเดิม name="action")
+  function toggleMode(btn){
+    const wrap = btn.parentElement;
+    const form = wrap.closest('form');
+    wrap.querySelectorAll('button').forEach(b => b.classList.remove('is-on'));
+    btn.classList.add('is-on');
+    const mode = btn.getAttribute('data-mode') || 'add';
+    form.querySelector('input[name="action"]').value = mode;
+  }
+
+  // ปุ่ม nudger เพิ่มค่าเร็ว ๆ
+  function nudge(el, by){
+    const form = el.closest('form');
+    const input = form.querySelector('input[name="qty"]');
+    let v = parseInt(input.value || '1', 10);
+    if (Number.isNaN(v)) v = 1;
+    v = Math.max(1, v + by);
+    input.value = v;
+  }
+
+  // กันกรอก 0/ติดลบ และกันค่าวันที่ไม่ใช่ตัวเลข
+  function validateRow(form){
+    const qtyEl = form.querySelector('input[name="qty"]');
+    let v = parseInt(qtyEl.value || '1', 10);
+    if (Number.isNaN(v) || v <= 0){ qtyEl.value = 1; v = 1; }
+    return true;
+  }
+</script>
+
+<%- include('../partials/foot') %>

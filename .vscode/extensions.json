@@ -1,0 +1,14 @@
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "Prisma.prisma",
+    "DigitalBrainstem.javascript-ejs-support",
+    "qwtel.sqlite-viewer",
+    "eamodio.gitlens",
+    "mikestead.dotenv",
+    "humao.rest-client",
+    "christian-kohler.path-intellisense",
+    "christian-kohler.npm-intellisense"
+  ]
+}

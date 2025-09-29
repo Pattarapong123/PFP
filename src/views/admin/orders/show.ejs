@@ -1,0 +1,265 @@
+<!-- src/views/admin/orders/show.ejs -->
+<%- include('../partials/head', { title: `ออเดอร์ #${order.id} • PFP` }) %>
+
+<style>
+  :root{ --gap:18px; --round:16px; }
+  .page{ display:grid; gap:var(--gap); }
+
+  /* ===== Summary Bar ===== */
+  .bar{
+    display:grid; grid-template-columns: 1fr auto; gap:12px; align-items:center;
+    background:linear-gradient(180deg,#fafafa 0%,#fff 100%);
+    border:1px solid var(--border); border-radius:var(--round); padding:14px 16px; box-shadow:var(--shadow);
+  }
+  .bar-left{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; min-width:0; }
+  .back{
+    display:inline-flex; align-items:center; gap:8px; padding:10px 14px;
+    border:1px solid var(--border); border-radius:12px; background:#fff; color:var(--text); font-weight:800;
+    text-decoration:none; transition: transform .12s ease, box-shadow .12s ease;
+  }
+  .back:hover{ transform:translateY(-1px); box-shadow:0 10px 20px rgba(0,0,0,.06); }
+  .title{ font-weight:900; white-space:nowrap; }
+  .title small{ color:var(--muted); font-weight:600; margin-left:6px; }
+  .tags{ display:flex; gap:8px; flex-wrap:wrap; margin-left:auto; }
+  .chip{
+    display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px;
+    background:var(--panel); border:1px solid var(--border); font-weight:800; font-size:.85rem; color:var(--text);
+  }
+  .badge{
+    display:inline-flex; align-items:center; padding:8px 14px; border-radius:999px; font-weight:900; color:#fff;
+    letter-spacing:.2px; text-transform:uppercase; font-size:.8rem;
+  }
+  .b-pending{ background:#f59e0b; } .b-paid{ background:#10b981; }
+  .b-shipped{ background:#3b82f6; } .b-cancel{ background:#ef4444; }
+
+  /* ===== Main Grid ===== */
+  .grid{ display:grid; grid-template-columns: 1.35fr 1fr; gap:var(--gap); }
+  @media (max-width:1100px){ .grid{ grid-template-columns:1fr; } }
+
+  /* ===== Cards ===== */
+  .card{ background:#fff; border:1px solid var(--border); border-radius:var(--round); box-shadow:var(--shadow); overflow:hidden; }
+  .card-hd{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:14px 16px; border-bottom:1px solid var(--border); font-weight:900;
+    background:linear-gradient(180deg,#fbfbfb 0%,#fff 100%);
+  }
+  .card-bd{ padding:16px; }
+  .section{ margin-top:10px; font-weight:900; }
+
+  /* ===== Items table ===== */
+  .tbl{ width:100%; border-collapse:separate; border-spacing:0; }
+  .tbl th,.tbl td{ padding:12px 14px; border-bottom:1px solid var(--border); vertical-align:top; }
+  .tbl thead th{ color:var(--muted); font-weight:900; background:#fbfbfb; }
+  .tbl tfoot th{ background:#fafafa; }
+  .num{ text-align:right; white-space:nowrap; }
+  .prod{ display:flex; flex-direction:column; gap:4px; }
+  .prod .name{ font-weight:800; }
+  .prod .meta{ color:var(--muted); font-size:.88rem; }
+
+  /* ===== Key/Value grid ===== */
+  .kv{ display:grid; grid-template-columns:120px minmax(0,1fr); gap:10px 14px; align-items:baseline; }
+  .kv .k{ color:var(--muted); font-size:.9rem; line-height:1.5; }
+  .kv .v{ line-height:1.5; word-break:break-word; }
+  .mono{ font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+  @media (max-width:900px){ .kv{ grid-template-columns:110px 1fr; } }
+
+  /* ===== Slip block ===== */
+  .slip-wrap{ width:min(560px, 100%); margin-inline:auto; display:flex; flex-direction:column; align-items:center; gap:12px; }
+  .slip-wrap .slip-img{
+    width:100%; max-width:360px; border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow); background:#fff;
+  }
+  .slip-wrap .sum-chip{
+    display:inline-flex; align-items:center; gap:8px; padding:8px 14px; border-radius:999px;
+    background:var(--neutral-50); border:1px solid var(--border); box-shadow:0 8px 24px rgba(16,24,40,.06); font-weight:900;
+  }
+  .slip-actions{ width:100%; display:flex; align-items:stretch; gap:12px; justify-content:center; }
+  .slip-actions .btn{
+    height:44px; padding:0 16px; border-radius:12px; font-weight:800; border:1px solid var(--border);
+    display:inline-flex; align-items:center; justify-content:center; min-width:160px;
+  }
+  .btn-primary{ background:var(--primary); border-color:color-mix(in oklab,var(--primary) 70%,transparent); color:#fff; }
+  .btn-primary:hover{ background:color-mix(in oklab,var(--primary) 85%,#0000); }
+  .btn-danger{ background:#ef4444; border-color:#ef4444; color:#fff; }
+  .btn-danger:hover{ background:#dc2626; }
+
+  .reject-form{ display:flex; gap:10px; flex:1; }
+  .reject-form .input{
+    flex:1 1 auto; height:44px; padding:10px 12px; border:1px solid var(--border); border-radius:12px; background:var(--panel); color:var(--text);
+    min-width: 180px;
+  }
+
+  @media (max-width:600px){
+    .slip-actions{ flex-direction:column; }
+    .slip-actions .btn{ min-width:unset; width:100%; }
+    .reject-form{ flex-direction:column; }
+    .reject-form .input{ width:100%; }
+  }
+
+  .mt-8{ margin-top:8px; } .mt-12{ margin-top:12px; }
+  .mt-14{ margin-top:14px; } .mt-18{ margin-top:18px; }
+</style>
+
+<%
+  // ใช้ helpers จาก app.locals (statusBadgeClass, statusLabelTH)
+  const badgeClass = (typeof statusBadgeClass === 'function') ? statusBadgeClass(order.status) : 'b-pending';
+  const toTH = (typeof statusLabelTH === 'function') ? statusLabelTH : (s => s);
+%>
+
+<div class="page">
+  <!-- Header -->
+  <div class="bar">
+    <div class="bar-left">
+      <a class="back" href="/admin/orders">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M15 18l-6-6 6-6" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        กลับไปหน้าออเดอร์
+      </a>
+      <div class="title">
+        ออเดอร์ #<%= order.id %>
+        <small><%= new Date(order.createdAt).toLocaleString('th-TH') %></small>
+      </div>
+      <div class="tags">
+        <span class="chip">วิธีชำระ: <strong><%= order.paymentMethod || '-' %></strong></span>
+        <span class="chip">อ้างอิง: <strong class="mono"><%= order.paymentRef || '-' %></strong></span>
+        <span class="chip">ยอดสุทธิ: <strong><%= Number(order.totalBaht).toLocaleString('th-TH',{minimumFractionDigits:2}) %> ฿</strong></span>
+      </div>
+    </div>
+    <div class="bar-right">
+      <span class="badge <%= badgeClass %>"><%= toTH(order.status) %></span>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="grid">
+    <!-- LEFT: Items -->
+    <div class="card">
+      <div class="card-hd">รายการสินค้า</div>
+      <div class="card-bd" style="padding:0;">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>สินค้า</th>
+              <th style="width:110px;text-align:right;">จำนวน</th>
+              <th style="width:140px;text-align:right;">ราคา/หน่วย</th>
+              <th style="width:160px;text-align:right;">รวม</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (!order.items.length) { %>
+              <tr><td colspan="4" style="text-align:center;color:var(--muted); padding:20px;">ไม่มีรายการสินค้า</td></tr>
+            <% } %>
+            <% order.items.forEach(it => { %>
+              <tr>
+                <td>
+                  <div class="prod">
+                    <span class="name"><%= it.product ? it.product.name : `#${it.productId}` %></span>
+                    <span class="meta"><%= it.product ? it.product.slug : '' %></span>
+                  </div>
+                </td>
+                <td class="num"><%= it.qty %></td>
+                <td class="num"><%= Number(it.unitPriceBaht).toLocaleString('th-TH',{minimumFractionDigits:2}) %> ฿</td>
+                <td class="num"><%= Number(it.unitPriceBaht * it.qty).toLocaleString('th-TH',{minimumFractionDigits:2}) %> ฿</td>
+              </tr>
+            <% }) %>
+          </tbody>
+          <tfoot>
+            <tr>
+              <th colspan="3" class="num">รวมทั้งสิ้น</th>
+              <th class="num"><%= Number(order.totalBaht).toLocaleString('th-TH',{minimumFractionDigits:2}) %> ฿</th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <!-- RIGHT: Summary / Customer / Address / Slip / Actions / Shipping -->
+    <div class="card">
+      <div class="card-hd">ข้อมูลออเดอร์</div>
+      <div class="card-bd">
+        <!-- Customer -->
+        <div class="section">ลูกค้า</div>
+        <div class="kv">
+          <div class="k">อีเมล</div><div class="v mono"><%= order.user ? order.user.email : '-' %></div>
+          <div class="k">ชื่อ</div><div class="v"><strong><%= order.user ? (order.user.name || '-') : '-' %></strong></div>
+        </div>
+
+        <!-- Address -->
+        <div class="section mt-12">ที่อยู่จัดส่ง</div>
+        <% if (order.shippingAddress) { %>
+          <div class="v" style="line-height:1.6;">
+            <%= order.shippingAddress.line1 %>
+            <% if (order.shippingAddress.line2) { %>, <%= order.shippingAddress.line2 %><% } %>,
+            <%= order.shippingAddress.district %>
+            <% if (order.shippingAddress.zone) { %>, <%= order.shippingAddress.zone %><% } %> ,
+            <%= order.shippingAddress.province %> <%= order.shippingAddress.postcode %> ,
+            <%= order.shippingAddress.country %>
+            <% if (order.shippingAddress.phone) { %> • โทร: <%= order.shippingAddress.phone %><% } %>
+          </div>
+        <% } else { %>
+          <div class="chip">ไม่มีที่อยู่จัดส่ง</div>
+        <% } %>
+
+        <!-- Shipping (tracking + shippedAt) -->
+        <div class="section mt-12">ขนส่ง</div>
+        <div class="kv">
+          <div class="k">เลขพัสดุ</div>
+          <div class="v">
+            <form method="post" action="/admin/orders/<%= order.id %>/tracking" style="display:flex; gap:8px; align-items:center;">
+              <input type="text" name="trackingNo" value="<%= order.trackingNo || '' %>" placeholder="ใส่เลขพัสดุ"
+                     style="height:36px; padding:6px 10px; border:1px solid var(--border); border-radius:8px; width:220px;">
+              <button class="btn btn-primary" type="submit" style="height:36px;">บันทึกเลขพัสดุ</button>
+            </form>
+          </div>
+
+          <div class="k">ส่งเมื่อ</div>
+          <div class="v"><%= order.shippedAt ? new Date(order.shippedAt).toLocaleString('th-TH') : '-' %></div>
+        </div>
+
+        <!-- Slip -->
+        <div class="section mt-12">สลิปการชำระเงิน</div>
+        <% if (order.paymentSlipUrl) { %>
+          <div class="slip-wrap">
+            <a href="<%= order.paymentSlipUrl %>" target="_blank" rel="noreferrer">
+              <img class="slip-img" src="<%= order.paymentSlipUrl %>" alt="สลิปการชำระเงิน">
+            </a>
+            <div class="sum-chip">ยอดออเดอร์: <strong>&nbsp;<%= Number(order.totalBaht).toLocaleString('th-TH',{minimumFractionDigits:2}) %> ฿</strong></div>
+
+            <div class="slip-actions">
+              <!-- Approve -->
+              <form method="post" action="/admin/orders/<%= order.id %>/payment/approve">
+                <button class="btn btn-primary" type="submit">อนุมัติสลิป</button>
+              </form>
+
+              <!-- Reject -->
+              <form class="reject-form" method="post" action="/admin/orders/<%= order.id %>/payment/reject"
+                    onsubmit="return confirm('ปฏิเสธสลิปนี้?');">
+                <input class="input" type="text" name="reason" placeholder="เหตุผล (ถ้ามี)">
+                <button class="btn btn-danger" type="submit">ปฏิเสธสลิป</button>
+              </form>
+            </div>
+          </div>
+        <% } else { %>
+          <div class="chip">ไม่มีสลิปแนบมากับออเดอร์นี้</div>
+        <% } %>
+
+        <!-- Update status -->
+        <div class="section mt-14">อัปเดตสถานะ</div>
+        <form method="post" action="/admin/orders/<%= order.id %>/status" class="slip-actions" style="gap:10px; justify-content:flex-start;">
+          <select name="status" class="reject-form input" style="height:44px; max-width:280px;">
+            <% (statusOptionsTH || [{v:'PENDING',t:'รอตรวจสลิป'},{v:'PAID',t:'ชำระแล้ว'},{v:'SHIPPED',t:'จัดส่งแล้ว'},{v:'CANCELLED',t:'ยกเลิก'}]).forEach(function(opt){ %>
+              <option value="<%= opt.v %>" <%= opt.v === order.status ? 'selected' : '' %>><%= opt.t %></option>
+            <% }) %>
+          </select>
+          <button class="btn btn-primary" type="submit">บันทึก</button>
+        </form>
+
+        <!-- Danger -->
+        <div class="section mt-18">การจัดการ</div>
+        <form method="post" action="/admin/orders/<%= order.id %>/delete" onsubmit="return confirm('ยืนยันลบออเดอร์นี้?');">
+          <button class="btn btn-danger" type="submit">ลบออเดอร์</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/foot') %>

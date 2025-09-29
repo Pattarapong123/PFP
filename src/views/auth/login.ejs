@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8"/>
+  <title>เข้าสู่ระบบ • PFP</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .form-grid{display:grid;gap:12px}
+    .field{display:grid;gap:6px}
+    .hint{color:var(--muted);font-size:.95em}
+    .error{border-left:4px solid #ef4444;background:#fff5f5}
+    .input-wrap{position:relative}
+    .toggle-pass{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:.9em;cursor:pointer;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <%- include('../partials/header') %>
+
+  <main class="container" style="max-width:560px;padding:24px 0;">
+    <h1 style="margin-bottom:14px">เข้าสู่ระบบ</h1>
+
+    <% if (error) { %>
+      <div class="card error" style="margin-bottom:16px"><%= error %></div>
+    <% } %>
+
+    <form method="post" action="/auth/login" class="card form-grid">
+      <!-- CSRF (ถ้าไม่ได้เปิด middleware ไว้ ค่านี้จะว่าง ๆ ไม่เป็นไร) -->
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <input type="hidden" name="next" value="<%= next || '/' %>">
+
+      <div class="field">
+        <label for="email">อีเมล</label>
+        <input id="email" name="email" type="email" required autocomplete="email" autofocus placeholder="you@example.com">
+      </div>
+
+      <div class="field">
+        <label for="password">รหัสผ่าน</label>
+        <div class="input-wrap">
+          <input id="password" name="password" type="password" required autocomplete="current-password" placeholder="••••••••">
+          <span id="togglePass" class="toggle-pass" aria-role="button">แสดง</span>
+        </div>
+        <div class="hint">รหัสผ่านถูกเก็บแบบแฮช (ปลอดภัย)</div>
+      </div>
+
+      <button class="btn" style="margin-top:6px">เข้าสู่ระบบ</button>
+    </form>
+
+    <p style="margin-top:12px">
+      ยังไม่มีบัญชี? <a href="/auth/register<%= next ? ('?next=' + encodeURIComponent(next)) : '' %>">สมัครสมาชิก</a>
+    </p>
+    <p class="hint" style="margin-top:4px">
+      ผู้ดูแลระบบเข้า <a href="/admin/login">/admin/login</a>
+    </p>
+  </main>
+
+  <%- include('../partials/footer') %>
+
+  <script>
+    (function () {
+      const $btn = document.getElementById('togglePass');
+      const $inp = document.getElementById('password');
+      if ($btn && $inp) {
+        $btn.addEventListener('click', () => {
+          const isPwd = $inp.type === 'password';
+          $inp.type = isPwd ? 'text' : 'password';
+          $btn.textContent = isPwd ? 'ซ่อน' : 'แสดง';
+        });
+      }
+    }());
+  </script>
+</body>
+</html>

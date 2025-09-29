@@ -1,0 +1,185 @@
+<!-- src/views/admin/portfolio/index.ejs -->
+<%- include('../partials/head', { title: 'ผลงาน • Admin' }) %>
+
+<style>
+  /* สัดส่วนตาราง + จัดแนว */
+  .admin-card.table-wrap{ padding: 0; overflow: hidden; }
+  .table-scroller{ overflow: auto; border-radius: var(--radius); }
+
+  .admin-table.admin-portfolio { table-layout: fixed; }
+  .admin-table.admin-portfolio th,
+  .admin-table.admin-portfolio td{
+    vertical-align: middle;
+    text-align: center;
+  }
+  .admin-table.admin-portfolio th.title-col,
+  .admin-table.admin-portfolio td.title-col{ text-align: left; }
+
+  /* คอลัมน์ */
+  .thumb-col   { width: 84px; }
+  .title-col   { width: auto; }
+  .slug-col    { width: 260px; }
+  .date-col    { width: 180px; white-space: nowrap; }
+  .actions-col { width: 240px; text-align: center; }
+
+  /* รูปตัวอย่าง */
+  .thumb{
+    width: 64px; height: 48px;
+    object-fit: cover; border-radius: 10px;
+    border: 1px solid var(--border); box-shadow: var(--shadow);
+    margin-inline: auto;
+  }
+
+  /* ชื่อ/รหัส */
+  .pf-title{ font-weight: 800; line-height: 1.35; }
+  .pf-id{ color: var(--muted); font-size: 12px; }
+
+  /* slug */
+  .pf-slug{
+    display: inline-flex; align-items: center; gap: 8px;
+    max-width: 100%;
+    padding: 6px 10px; border-radius: 999px;
+    border: 1px solid var(--border); background: var(--panel);
+    font-size: 13px; line-height: 1; white-space: nowrap;
+  }
+  .pf-slug code{
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    font-weight: 700;
+    max-width: 180px;
+    overflow: hidden; text-overflow: ellipsis;
+    display: inline-block;
+  }
+
+  /* วันที่ */
+  .date-text{ color: var(--muted); font-size: 12px; }
+
+  /* ปุ่มจัดการ */
+  .actions-col .admin-btn-group{ justify-content: center; gap: 6px; }
+  .actions-col .admin-btn{
+    min-width: 78px;
+    justify-content: center;
+    text-align: center;
+  }
+  .actions-col .admin-btn--soft{
+    padding: 10px 12px;
+  }
+  .actions-col .admin-btn--danger{
+    padding: 10px 14px;
+  }
+  .actions-col .admin-btn--ghost{
+    padding: 8px 12px;
+  }
+
+  /* Responsive */
+  @media (max-width: 860px){
+    .actions-col .admin-btn-group{ flex-wrap: wrap; }
+    .actions-col .admin-btn{ flex: 1 1 auto; min-width: 0; }
+  }
+</style>
+
+<main class="admin-main">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <nav class="admin-breadcrumbs" aria-label="Breadcrumb">
+        <a href="/admin">แอดมิน</a>
+        <span>/</span>
+        <span>ผลงาน</span>
+      </nav>
+      <h1 style="margin:6px 0 0;">ผลงาน</h1>
+    </div>
+    <div class="admin-btn-group">
+      <a class="admin-btn admin-btn--soft" href="/admin/portfolio/new">+ เพิ่มผลงาน</a>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <section class="admin-card table-wrap">
+    <div class="table-scroller">
+      <table class="admin-table admin-portfolio">
+        <colgroup>
+          <col class="thumb-col">
+          <col class="title-col">
+          <col class="slug-col">
+          <col class="date-col">
+          <col class="actions-col">
+        </colgroup>
+
+        <thead>
+          <tr>
+            <th class="thumb-col">รูป</th>
+            <th class="title-col">ชื่อผลงาน</th>
+            <th class="slug-col">Slug</th>
+            <th class="date-col">วันที่เผยแพร่</th>
+            <th class="actions-col">จัดการ</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <% if (!posts || posts.length === 0) { %>
+            <tr>
+              <td colspan="5">
+                <div class="admin-empty">
+                  <div class="admin-skeleton" style="max-width: 360px;"></div>
+                  <div>ยังไม่มีผลงานในระบบ</div>
+                  <a href="/admin/portfolio/new" class="admin-btn">+ เพิ่มผลงานแรก</a>
+                </div>
+              </td>
+            </tr>
+          <% } %>
+
+          <% (posts || []).forEach(p => { %>
+            <tr>
+              <td>
+                <% if (p.featuredImageUrl) { %>
+                  <img class="thumb" src="<%= p.featuredImageUrl %>" alt="ภาพ <%= p.title %>">
+                <% } else { %>
+                  <div class="admin-skeleton" style="width:64px;height:48px;border-radius:10px;margin-inline:auto;"></div>
+                <% } %>
+              </td>
+
+              <td class="title-col">
+                <div class="pf-title"><%= p.title %></div>
+                <div class="pf-id">ID: <%= p.id %></div>
+              </td>
+
+              <td>
+                <span class="pf-slug"><code title="<%= p.slug %>"><%= p.slug %></code></span>
+              </td>
+
+              <td>
+                <% if (p.publishedAt) { %>
+                  <div><%= new Date(p.publishedAt).toLocaleDateString('th-TH') %></div>
+                  <div class="date-text">
+                    <%= new Date(p.publishedAt).toLocaleTimeString('th-TH', { hour:'2-digit', minute:'2-digit' }) %>
+                  </div>
+                <% } else { %>
+                  <span class="date-text">ยังไม่เผยแพร่</span>
+                <% } %>
+              </td>
+
+              <td class="actions-col">
+                <div class="admin-btn-group">
+                  <a class="admin-btn admin-btn--soft" href="/admin/portfolio/<%= p.id %>/edit">แก้ไข</a>
+                  <form method="post" action="/admin/portfolio/<%= p.id %>/delete"
+                        onsubmit="return confirm('ลบผลงาน “<%= p.title %>” ?')" style="display:inline">
+                    <!-- CSRF -->
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button class="admin-btn admin-btn--danger" type="submit">ลบ</button>
+                  </form>
+                  <a class="admin-btn admin-btn--ghost" href="/portfolio/<%= p.slug %>" target="_blank" rel="noopener">
+                    ดูหน้าเว็บ
+                  </a>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<%- include('../partials/foot') %>

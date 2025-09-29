@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <title>403 – เข้าถึงไม่ได้</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <%- include('partials/header') %>
+
+  <main class="container" style="padding:24px 0;">
+    <div class="card" style="max-width:680px;margin:0 auto;text-align:center;">
+      <h1 style="margin:0 0 8px;">403 – เข้าถึงไม่ได้</h1>
+      <p style="color:var(--muted);margin:0 0 12px;">
+        <%= typeof message !== 'undefined' && message ? message : 'ฟอร์มหมดอายุหรือไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง' %>
+      </p>
+
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:8px;">
+        <a class="btn" href="/" aria-label="กลับหน้าแรก">กลับหน้าแรก</a>
+        <a class="btn btn--ghost" href="javascript:history.back()" aria-label="ย้อนกลับ">ย้อนกลับ</a>
+      </div>
+
+      <details style="margin-top:14px;">
+        <summary class="admin-muted">วิธีแก้ปัญหา</summary>
+        <ul style="text-align:left;margin-top:8px;">
+          <li>ลองรีเฟรชหน้า แล้วส่งแบบฟอร์มอีกครั้ง</li>
+          <li>ถ้าหน้าเปิดทิ้งไว้นาน โทเค็นอาจหมดอายุ ให้ลองใหม่</li>
+          <li>หากเปิดหลายแท็บ ให้ใช้งานบนแท็บเดียว</li>
+        </ul>
+      </details>
+    </div>
+  </main>
+
+  <%- include('partials/footer') %>
+</body>
+</html>

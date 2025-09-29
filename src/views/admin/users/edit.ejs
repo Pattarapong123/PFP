@@ -1,0 +1,108 @@
+<%- include('../partials/head', { title: `แก้ไขผู้ใช้ #${user.id} • PFP` }) %>
+
+<style>
+  /* layout เฉพาะเพจนี้ */
+  .user-edit-header{
+    display:flex; align-items:center; gap:12px; margin-bottom:14px;
+  }
+  .user-edit-header h1{ margin:0; font-size:1.25rem; }
+  .user-edit-grid{
+    display:grid; gap:16px;
+    grid-template-columns: minmax(0,1fr) minmax(260px,.6fr);
+    align-items:start;
+  }
+  .user-sticky{ position: sticky; top: 16px; }
+  @media (max-width: 980px){
+    .user-edit-grid{ grid-template-columns: 1fr; }
+    .user-sticky{ position: static; }
+  }
+
+  /* ปรับช่องฟอร์มให้แน่นกระชับขึ้นนิดหน่อย */
+  .admin-form .admin-field{ margin-bottom:10px; }
+  .admin-card__title{ font-weight:800; margin-bottom:8px; }
+  .divider{ border:none; border-top:1px dashed var(--border); margin:12px 0; }
+</style>
+
+<main class="admin-main">
+  <nav class="admin-breadcrumbs">
+    <a href="/admin">แดชบอร์ด</a> <span>/</span>
+    <a href="/admin/users">ผู้ใช้</a> <span>/</span>
+    แก้ไข
+  </nav>
+
+  <div class="user-edit-header">
+    <h1>แก้ไขผู้ใช้ #<%= user.id %></h1>
+    <span class="admin-chip"><%= user.role %></span>
+    <div style="margin-left:auto"></div>
+    <a class="admin-btn admin-btn--soft" href="/admin/users">กลับ</a>
+  </div>
+
+  <% if (errors) { %>
+    <div class="admin-alert admin-alert--danger" style="margin-bottom:14px;"><%= errors %></div>
+  <% } %>
+
+  <div class="user-edit-grid">
+    <!-- ซ้าย: ฟอร์มหลัก -->
+    <section class="admin-card">
+      <form class="admin-form" method="post" action="/admin/users/<%= user.id %>">
+        <div class="admin-grid-2">
+          <div class="admin-field">
+            <label>ชื่อ</label>
+            <input class="admin-input" type="text" name="name" value="<%= user.name %>" required>
+          </div>
+          <div class="admin-field">
+            <label>อีเมล</label>
+            <input class="admin-input" type="email" name="email" value="<%= user.email %>" required>
+          </div>
+        </div>
+
+        <div class="admin-field" style="max-width:260px">
+          <label>Role</label>
+          <select class="admin-select" name="role" required>
+            <option value="ADMIN"    <%= user.role==='ADMIN'    ? 'selected':'' %>>ADMIN</option>
+            <option value="STAFF"    <%= user.role==='STAFF'    ? 'selected':'' %>>STAFF</option>
+            <option value="CUSTOMER" <%= user.role==='CUSTOMER' ? 'selected':'' %>>CUSTOMER</option>
+          </select>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="admin-btn-group">
+          <button class="admin-btn" type="submit">บันทึก</button>
+          <a class="admin-btn admin-btn--ghost" href="/admin/users">ยกเลิก</a>
+        </div>
+      </form>
+    </section>
+
+    <!-- ขวา: กล่องรีเซ็ตรหัสผ่าน (sticky) -->
+    <aside class="user-sticky">
+      <section class="admin-card">
+        <div class="admin-card__title">รีเซ็ตรหัสผ่าน</div>
+        <form class="admin-form" method="post" action="/admin/users/<%= user.id %>/reset-password">
+          <div class="admin-field">
+            <label>รหัสผ่านใหม่</label>
+            <input class="admin-input" type="password" name="password" minlength="6" required placeholder="อย่างน้อย 6 ตัวอักษร">
+          </div>
+          <div class="admin-btn-group">
+            <button class="admin-btn admin-btn--danger"
+                    onclick="return confirm('ยืนยันรีเซ็ตรหัสผ่านของผู้ใช้ #<%= user.id %>?');">
+              ตั้งรหัสผ่านใหม่
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- กล่องข้อมูลสรุปเล็ก ๆ -->
+      <section class="admin-card" style="margin-top:12px;">
+        <div class="admin-card__title">ข้อมูลผู้ใช้</div>
+        <div class="admin-def-list">
+          <div><span>ID</span><strong>#<%= user.id %></strong></div>
+          <div><span>อีเมล</span><strong style="word-break:break-all;"><%= user.email %></strong></div>
+          <div><span>บทบาท</span><strong><%= user.role %></strong></div>
+        </div>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<%- include('../partials/foot') %>

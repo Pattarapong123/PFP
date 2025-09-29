@@ -1,0 +1,144 @@
+<%- include('../partials/head', { title: 'จัดการสินค้า • PFP' }) %>
+
+<style>
+  /* --- ปรับหัวข้อเมนูให้อยู่กลาง --- */
+  .admin-table th {
+    text-align: center;
+    vertical-align: middle;
+  }
+  .admin-table th.name-col {
+    text-align: left;
+  }
+
+  .sku-col     { width: 170px; text-align:center; }
+  .sku-cell    { text-align:center; }
+  .sku-badge{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:6px 10px; border-radius:999px;
+    border:1px solid var(--border); background:var(--panel);
+    font-size:13px; line-height:1; white-space:nowrap;
+  }
+  .sku-badge .dot{ width:8px; height:8px; border-radius:50%; background: currentColor; color:#111; opacity:.9; }
+  .sku-badge .code{
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    font-weight:700; letter-spacing:.2px;
+  }
+
+  .slug-cell > div{ max-width:420px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+
+  .price-col   { width:120px; text-align:right; white-space:nowrap; }
+  .actions-col { width:200px; text-align:center; }
+  .actions-col .admin-btn-group{ justify-content:center; }
+
+  @media (max-width: 900px){
+    .sku-col{ width:150px; }
+    .slug-cell > div{ max-width:260px; }
+  }
+</style>
+
+<main class="admin-main">
+
+  <!-- Page Header -->
+  <div class="page-header admin-main">
+    <div>
+      <nav class="admin-breadcrumbs" aria-label="Breadcrumb">
+        <a href="/admin">แดชบอร์ด</a>
+        <span>/</span>
+        <span>สินค้า</span>
+      </nav>
+      <h1 style="margin:6px 0 0;">สินค้า</h1>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <form class="admin-toolbar" method="get" action="/admin/products" role="search">
+    <div class="admin-input-group" style="flex:1;">
+      <input
+        class="admin-input"
+        type="text"
+        name="q"
+        placeholder="พิมพ์ชื่อสินค้า / SKU / Slug"
+        value="<%= typeof q !== 'undefined' ? q : '' %>"
+        aria-label="ค้นหาสินค้า"
+      >
+    </div>
+    <a href="/admin/products/new" class="admin-btn admin-btn--soft">+ เพิ่มสินค้า</a>
+  </form>
+
+  <!-- Table Card -->
+  <section class="admin-card" style="padding:0;">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th style="width:86px">รูป</th>
+          <th class="name-col" style="min-width:280px;">ชื่อสินค้า</th>
+          <th class="sku-col">SKU</th>
+          <th>Slug</th>
+          <th class="price-col">ราคา</th>
+          <th class="actions-col">จัดการ</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (!products.length) { %>
+          <tr>
+            <td colspan="6">
+              <div class="admin-empty">
+                <div class="admin-skeleton" style="max-width: 360px;"></div>
+                <div>ยังไม่มีสินค้าในระบบ</div>
+                <a href="/admin/products/new" class="admin-btn">+ เพิ่มสินค้าแรก</a>
+              </div>
+            </td>
+          </tr>
+        <% } %>
+
+        <% products.forEach(p => { %>
+          <tr>
+            <td>
+              <% if (p.firstImage) { %>
+                <img class="thumb" src="<%= p.firstImage %>" alt="ภาพ <%= p.name %>">
+              <% } else { %>
+                <div class="admin-skeleton" style="width:56px;height:42px;border-radius:8px;"></div>
+              <% } %>
+            </td>
+
+            <td>
+              <div style="font-weight:800; line-height:1.35;"><%= p.name %></div>
+              <div class="admin-muted" style="font-size:12px;">ID: <%= p.id %></div>
+            </td>
+
+            <td class="sku-cell">
+              <% if (p.sku) { %>
+                <span class="sku-badge">
+                  <span class="dot"></span>
+                  <span class="code"><%= p.sku %></span>
+                </span>
+              <% } else { %>
+                <span class="admin-muted">—</span>
+              <% } %>
+            </td>
+
+            <td class="slug-cell"><div><code><%= p.slug %></code></div></td>
+            <td class="price-col"><%= Number(p.price).toLocaleString('th-TH') %> ฿</td>
+            <td class="actions-col">
+              <div class="admin-btn-group">
+                <a class="admin-btn admin-btn--soft" href="/admin/products/<%= p.id %>/edit">แก้ไข</a>
+                
+                <!-- ปุ่มลบ: มี confirm + CSRF -->
+                <form method="post" action="/admin/products/<%= p.id %>/delete"
+                  onsubmit="return confirm('ลบสินค้า <%= (p.name || '').replace(/'/g, '\\\'') %> ?')"
+                  style="display:inline">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <button class="admin-btn admin-btn--danger" type="submit">ลบ</button>
+                </form>
+
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </section>
+
+</main>
+
+<%- include('../partials/foot') %>

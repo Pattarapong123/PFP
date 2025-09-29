@@ -1,0 +1,113 @@
+<!-- src/views/admin/portfolio/new.ejs -->
+<%- include('../partials/head', { title: 'เพิ่มผลงาน • Admin' }) %>
+
+<main class="admin-main">
+  <div class="page-header">
+    <div>
+      <nav class="admin-breadcrumbs" aria-label="Breadcrumb">
+        <a href="/admin">แอดมิน</a><span>/</span><a href="/admin/portfolio">ผลงาน</a><span>/</span><span>เพิ่ม</span>
+      </nav>
+      <h1 style="margin:6px 0 0;">เพิ่มผลงาน</h1>
+    </div>
+    <div class="admin-btn-group">
+      <a class="admin-btn admin-btn--ghost" href="/admin/portfolio">ย้อนกลับ</a>
+    </div>
+  </div>
+
+  <% if (typeof errors === 'string' && errors) { %>
+    <section class="admin-card" style="border-color: color-mix(in oklab, var(--danger) 28%, var(--border));">
+      <div class="admin-chip admin-chip--danger" style="margin-bottom:8px;">
+        <span class="dot"></span>เกิดข้อผิดพลาด
+      </div>
+      <div style="color:var(--danger-600);"><%= errors %></div>
+    </section>
+  <% } %>
+
+  <form class="admin-card" method="post" action="/admin/portfolio" enctype="multipart/form-data">
+    <!-- CSRF -->
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+    <div class="admin-form-grid">
+      <div class="admin-col">
+        <div class="admin-field">
+          <label>ชื่อผลงาน</label>
+          <input class="admin-input" type="text" name="title" required />
+        </div>
+        <div class="admin-field">
+          <label>Slug <span class="admin-muted">(ถ้าเว้นว่าง ระบบจะสร้างจากชื่อ)</span></label>
+          <input class="admin-input" type="text" name="slug" />
+        </div>
+        <div class="admin-field">
+          <label>สรุป</label>
+          <input class="admin-input" type="text" name="summary" />
+        </div>
+        <div class="admin-field">
+          <label>รายละเอียด</label>
+          <textarea class="admin-textarea" name="content" rows="10"></textarea>
+        </div>
+      </div>
+
+      <div class="admin-col">
+        <div class="admin-field">
+          <label>รูปเด่น (Cover)</label>
+          <label class="admin-dropzone" id="dz-cover" for="featuredFile" style="min-height: 180px;">
+            <input id="featuredFile" type="file" name="featuredFile" accept="image/*">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+              <div class="admin-muted">ลากไฟล์มาวางหรือคลิกเพื่อเลือก</div>
+              <small class="admin-muted">PNG/JPG/WebP ขนาดไม่เกิน 5MB</small>
+              <img id="cover-thumb" class="dz-thumb" style="display:none;width:180px;height:128px;object-fit:cover;margin-top:6px;" />
+            </div>
+          </label>
+        </div>
+
+        <div class="admin-field">
+          <label>แกลเลอรี (หลายรูป)</label>
+          <label class="admin-dropzone" id="dz-gallery" for="galleryFiles" style="min-height: 120px;">
+            <input id="galleryFiles" type="file" name="galleryFiles" accept="image/*" multiple>
+            <div class="admin-muted">เลือกหลายไฟล์ได้ (สูงสุด ~20 รูป)</div>
+          </label>
+          <div id="gallery-preview" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px;margin-top:8px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-btn-group" style="margin-top:12px;">
+      <button class="admin-btn" type="submit">บันทึก</button>
+      <a class="admin-btn admin-btn--ghost" href="/admin/portfolio">ยกเลิก</a>
+    </div>
+  </form>
+</main>
+
+<script>
+  (function(){
+    // cover
+    const cov = document.getElementById('featuredFile');
+    const covImg = document.getElementById('cover-thumb');
+    cov.addEventListener('change', ()=>{
+      const f = cov.files && cov.files[0];
+      if(!f){ covImg.style.display='none'; return; }
+      covImg.src = URL.createObjectURL(f);
+      covImg.style.display='block';
+    });
+
+    // gallery
+    const gal = document.getElementById('galleryFiles');
+    const prev = document.getElementById('gallery-preview');
+    gal.addEventListener('change', ()=>{
+      prev.innerHTML='';
+      Array.from(gal.files||[]).forEach(f=>{
+        if(!f.type.startsWith('image/')) return;
+        const img=new Image();
+        img.src=URL.createObjectURL(f);
+        img.style.width='100%';
+        img.style.height='76px';
+        img.style.objectFit='cover';
+        img.style.borderRadius='10px';
+        img.style.border='1px solid var(--border)';
+        prev.appendChild(img);
+      });
+    });
+  })();
+</script>
+
+<%- include('../partials/foot') %>

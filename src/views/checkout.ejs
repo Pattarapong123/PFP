@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <title>ชำระเงิน • PFP</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    .checkout-grid{
+      display:grid; gap:20px;
+      grid-template-columns: minmax(0,1.15fr) minmax(0,.85fr);
+      align-items:start;
+    }
+    @media (max-width: 980px){
+      .checkout-grid{ grid-template-columns: 1fr; }
+    }
+    .aside-sticky{ position: sticky; top: 16px; }
+    .section-title{ margin: 0 0 6px; font-size: 1.05rem; font-weight: 800; }
+    .hint{ color: var(--muted); font-size:.9rem }
+    .divider{ border:none; border-top:1px dashed var(--border); margin:14px 0 }
+    .cart-list{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:10px; }
+    .cart-row{ display:flex; align-items:center; gap:12px; }
+    .cart-thumb{
+      width:64px; height:64px; object-fit:cover; border-radius:10px;
+      border:1px solid var(--border); background:#fff;
+    }
+    .cart-info{ flex:1; min-width:0 }
+    .cart-name{ font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .cart-price{ white-space:nowrap; font-weight:800; }
+    .bank-grid{ display:grid; gap:12px; grid-template-columns: 1fr 1fr; align-items:start; }
+    @media (max-width: 720px){ .bank-grid{ grid-template-columns:1fr; } }
+    .qr{
+      width:100%; max-width:260px; height:auto;
+      border:1px solid var(--border); border-radius:12px; box-shadow:var(--shadow);
+      margin-top:8px;
+    }
+    .file-hint{ font-size:12px; color:var(--muted); margin-top:4px; }
+    .slip-preview{
+      display:none; width:100%; max-width:320px; height:auto;
+      border:1px solid var(--border); border-radius:12px; box-shadow:var(--shadow);
+      margin-top:8px;
+    }
+  </style>
+</head>
+<body>
+  <%- include('partials/header') %>
+
+  <main class="container" style="padding:24px 0;">
+    <h1 style="margin-bottom:14px;">ชำระเงิน</h1>
+
+    <% if (error) { %>
+      <div class="admin-card" style="border-color: color-mix(in oklab, var(--danger) 35%, var(--border));">
+        <div style="color:var(--danger-600);"><%= error %></div>
+      </div>
+    <% } %>
+
+    <div class="checkout-grid">
+      <!-- ซ้าย: ที่อยู่ + วิธีชำระ -->
+      <section>
+        <form class="admin-card" method="post" action="/checkout" enctype="multipart/form-data" style="display:grid; gap:16px;">
+
+          <!-- ที่อยู่ -->
+          <div>
+            <div class="section-title">ที่อยู่จัดส่ง</div>
+            <% if (addresses && addresses.length) { %>
+              <div class="admin-field">
+                <label>เลือกที่อยู่ที่บันทึกไว้</label>
+                <select class="admin-select" name="addressId">
+                  <option value="">— ใช้ที่อยู่อื่น —</option>
+                  <% addresses.forEach(a => { %>
+                    <option value="<%= a.id %>"><%= a.line1 %>, <%= a.district %>, <%= a.province %> <%= a.postcode %></option>
+                  <% }) %>
+                </select>
+                <div class="hint" style="margin-top:6px;">หรือกรอกที่อยู่ใหม่ด้านล่าง</div>
+              </div>
+            <% } %>
+
+            <div class="admin-grid-2" style="margin-top:8px;">
+              <div class="admin-field">
+                <label>ที่อยู่</label>
+                <input class="admin-input" name="line1" value="<%= values.line1 || '' %>">
+              </div>
+              <div class="admin-field">
+                <label>ตำบล/แขวง</label>
+                <input class="admin-input" name="district" value="<%= values.district || '' %>">
+              </div>
+              <div class="admin-field">
+                <label>อำเภอ/เขต</label>
+                <input class="admin-input" name="zone" value="<%= values.zone || '' %>">
+              </div>
+              <div class="admin-field">
+                <label>จังหวัด</label>
+                <input class="admin-input" name="province" value="<%= values.province || '' %>">
+              </div>
+              <div class="admin-field">
+                <label>รหัสไปรษณีย์</label>
+                <input class="admin-input" name="postcode" value="<%= values.postcode || '' %>">
+              </div>
+              <div class="admin-field">
+                <label>ประเทศ</label>
+                <input class="admin-input" name="country" value="<%= values.country || 'TH' %>">
+              </div>
+              <div class="admin-field">
+                <label>เบอร์โทร</label>
+                <input class="admin-input" name="phone" value="<%= values.phone || '' %>">
+              </div>
+            </div>
+          </div>
+
+          <hr class="divider">
+
+          <!-- วิธีชำระเงิน -->
+          <div>
+            <div class="section-title">วิธีชำระเงิน</div>
+
+            <div class="admin-field" style="margin: 4px 0 10px;">
+              <label class="admin-radio">
+                <input type="radio" name="paymentMethod" value="TRANSFER" checked>
+                โอนผ่านธนาคาร / พร้อมเพย์
+              </label>
+            </div>
+
+            <div class="bank-grid">
+              <div class="admin-card" style="background:var(--panel)">
+                <div style="font-weight:800; font-size:16px;">ข้อมูลบัญชี</div>
+                <div class="hint" style="margin-top:6px;">ธนาคาร: <%= bank.bankName %></div>
+                <div class="hint">ชื่อบัญชี: <%= bank.accountName %></div>
+                <div class="hint">เลขที่บัญชี: <strong><%= bank.accountNo %></strong></div>
+                <div class="hint" style="margin-top:8px;">ยอดชำระ: <strong><%= total.toLocaleString('th-TH', {minimumFractionDigits:2}) %> ฿</strong></div>
+              </div>
+
+              <div class="admin-card" style="text-align:center;">
+                <div style="font-weight:800; font-size:16px;">สแกนจ่าย (QR)</div>
+                <img src="<%= bank.qrImageUrl %>" alt="QR" class="qr">
+                <div class="hint" style="margin-top:6px;">* ใช้ QR นี้ หรือโอนเข้าบัญชีด้านซ้าย</div>
+              </div>
+            </div>
+
+            <div class="admin-field" style="margin-top:12px;">
+              <label>หมายเหตุ/เลขอ้างอิงการโอน (ถ้ามี)</label>
+              <input class="admin-input" name="paymentRef" value="<%= values.paymentRef || '' %>">
+            </div>
+
+            <div class="admin-field">
+              <label>แนบสลิปโอน <span class="admin-muted">(จำเป็น)</span></label>
+              <input id="paymentSlip" class="admin-input" type="file" name="paymentSlip" accept="image/*" required>
+              <div class="file-hint">รองรับ PNG/JPG/WebP ขนาดไม่เกิน ~5MB</div>
+              <img id="slipPreview" class="slip-preview" alt="ตัวอย่างสลิป">
+            </div>
+          </div>
+
+          <div class="admin-btn-group" style="margin-top:4px;">
+            <button class="admin-btn" type="submit">ยืนยันคำสั่งซื้อ</button>
+            <a href="/cart" class="admin-btn admin-btn--ghost">กลับตะกร้า</a>
+          </div>
+        </form>
+      </section>
+
+      <!-- ขวา: สรุปรายการ (sticky) -->
+      <aside class="aside-sticky">
+        <section class="admin-card" style="padding-bottom:10px;">
+          <div class="section-title">รายการในตะกร้า</div>
+          <% if (!cart || cart.length === 0) { %>
+            <p class="hint">ไม่มีสินค้า</p>
+          <% } else { %>
+            <ul class="cart-list">
+              <% cart.forEach(i => { %>
+                <li class="cart-row">
+                  <img src="<%= i.imageUrl || '/images/placeholder.png' %>" alt="" class="cart-thumb">
+                  <div class="cart-info">
+                    <div class="cart-name"><%= i.name %></div>
+                    <div class="hint">x <%= i.qty %></div>
+                  </div>
+                  <div class="cart-price"><%= (i.price * i.qty).toLocaleString('th-TH', {minimumFractionDigits:2}) %> ฿</div>
+                </li>
+              <% }) %>
+            </ul>
+            <hr class="divider">
+            <div style="display:flex; align-items:center;">
+              <div style="font-weight:800;">รวมทั้งสิ้น</div>
+              <div style="margin-left:auto; font-weight:800;">
+                <%= total.toLocaleString('th-TH', {minimumFractionDigits:2}) %> ฿
+              </div>
+            </div>
+          <% } %>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <%- include('partials/footer') %>
+
+  <script>
+    // พรีวิวสลิปที่อัปโหลด
+    (function(){
+      var input = document.getElementById('paymentSlip');
+      var img = document.getElementById('slipPreview');
+      if (!input || !img) return;
+      input.addEventListener('change', function(){
+        const f = input.files && input.files[0];
+        if (!f || !f.type || !f.type.startsWith('image/')) {
+          img.style.display = 'none'; img.removeAttribute('src'); return;
+        }
+        img.src = URL.createObjectURL(f);
+        img.style.display = 'block';
+      });
+    })();
+  </script>
+</body>
+</html>

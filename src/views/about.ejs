@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>เกี่ยวกับเรา - PFP ENGINEERING</title>
+  <link rel="stylesheet" href="/styles.css">
+
+  <!-- Favicon -->
+  <link rel="icon" type="images/jpeg" href="/images/logo2.jpg">
+</head>
+<body>
+
+  <%- include('partials/header') %>
+
+  <main class="container" style="padding:24px 0;">
+    <!-- Hero/Intro -->
+    <section style="display:grid;grid-template-columns:1.1fr .9fr;gap:24px;align-items:center;">
+      <div>
+        <h1 style="margin:0 0 8px;">เกี่ยวกับเรา</h1>
+        <p style="color:var(--muted);margin:0 0 12px;">
+          PFP ENGINEERING คือทีมวิศวกรและที่ปรึกษาด้านไอทีที่มุ่งสร้างโซลูชันที่ปลอดภัย
+          มีประสิทธิภาพ และส่งมอบได้จริง ครอบคลุมงานระบบเครือข่าย เซิร์ฟเวอร์ คลาวด์
+          และซอฟต์แวร์สำหรับธุรกิจ
+        </p>
+        <p>
+          เราเชื่อในมาตรฐานงานที่ดี การสื่อสารที่โปร่งใส และการซัพพอร์ตที่ต่อเนื่องหลังส่งมอบ
+        </p>
+        <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;">
+          <a href="/products" class="btn">บริการของเรา</a>
+          <a href="/contact" class="btn" style="background:transparent;color:var(--primary);border:1px solid var(--primary);">
+            ติดต่อทีมงาน
+          </a>
+        </div>
+      </div>
+      <div>
+        <img src="/images/logo1.jpg" alt="ทีมงาน PFP ENGINEERING"
+             style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:var(--radius);box-shadow:var(--shadow);">
+      </div>
+    </section>
+
+    <!-- Values -->
+    <section style="margin-top:28px;">
+      <h2>สิ่งที่เราให้ความสำคัญ</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>คุณภาพงาน</h3>
+          <p>ออกแบบและทดสอบอย่างเป็นระบบ เอกสารครบ ตรวจสอบได้</p>
+        </div>
+        <div class="card">
+          <h3>ความปลอดภัย</h3>
+          <p>แนวทาง Security by Design ครอบคลุมตั้งแต่โครงสร้างจนถึงการปฏิบัติ</p>
+        </div>
+        <div class="card">
+          <h3>ความรวดเร็ว</h3>
+          <p>วางแผนงานชัดเจน ส่งมอบตามกำหนด พร้อมช่องทางซัพพอร์ต</p>
+        </div>
+        <div class="card">
+          <h3>ความคุ้มค่า</h3>
+          <p>แนะนำโซลูชันที่เหมาะสมกับงบและเป้าหมายธุรกิจของลูกค้า</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats / Highlights -->
+    <section style="margin-top:28px;">
+      <div class="grid">
+        <div class="card">
+          <span class="badge">ประสบการณ์</span>
+          <h3 style="margin-top:6px;">10+ ปี</h3>
+          <p>ทีมงานรวมประสบการณ์ในงานโครงสร้างพื้นฐานและซอฟต์แวร์</p>
+        </div>
+        <div class="card">
+          <span class="badge">โปรเจกต์</span>
+          <h3 style="margin-top:6px;">100+ โครงการ</h3>
+          <p>ตั้งแต่ SME จนถึงองค์กรขนาดใหญ่</p>
+        </div>
+        <div class="card">
+          <span class="badge">การซัพพอร์ต</span>
+          <h3 style="margin-top:6px;">SLA ชัดเจน</h3>
+          <p>มีแผนบำรุงรักษาและช่องทางติดต่อฉุกเฉิน</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <%- include('partials/footer') %>
+</body>
+</html>

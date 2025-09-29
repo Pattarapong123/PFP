@@ -1,0 +1,207 @@
+<%- include('../partials/head', { title: 'หมวดหมู่ • Admin' }) %>
+<main class="admin-main">
+
+  <!-- Local styles เฉพาะหน้านี้ -->
+  <style>
+    .cat-layout{display:grid;grid-template-columns:1fr 340px;gap:16px}
+    @media (max-width:1024px){.cat-layout{grid-template-columns:1fr}}
+    .admin-header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .header-actions{display:flex;gap:8px;align-items:center}
+    .search{display:flex;gap:8px;align-items:center}
+    .search input{min-width:260px}
+    @media (max-width:680px){.search input{min-width:0;flex:1}}
+    .muted-sm{font-size:.9rem;color:var(--muted)}
+    .table-wrap{overflow:auto;border:1px solid var(--border);border-radius:14px;background:#fff;box-shadow:var(--shadow)}
+    .admin-table{margin:0;border-collapse:separate;border-spacing:0;width:100%}
+    .admin-table thead th{position:sticky;top:0;background:#fff;z-index:1;border-bottom:1px solid var(--border)}
+    .admin-table th,.admin-table td{padding:10px 12px}
+    .admin-table tbody tr:nth-child(odd){background:#fafafa}
+    .slug-badge{display:inline-block;border:1px solid var(--border);border-radius:999px;padding:4px 8px;background:#f8fafc}
+    /* mobile: แสดงเป็นการ์ด */
+    @media (max-width:720px){
+      .admin-table{display:none}
+      .card-list{display:grid;gap:10px}
+      .cat-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:12px;box-shadow:var(--shadow)}
+      .cat-card .row{display:flex;justify-content:space-between;gap:8px;align-items:center}
+      .cat-card .meta{margin-top:4px}
+      .cat-card .actions{display:flex;gap:6px;margin-top:8px;justify-content:flex-end}
+    }
+    .side-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:14px;box-shadow:var(--shadow)}
+    .side-card form .row{display:grid;gap:10px}
+    .side-card form .row.two{grid-template-columns:1fr}
+    .help{font-size:.85rem;color:var(--muted)}
+  </style>
+
+  <nav class="admin-breadcrumbs">
+    <a href="/admin">แดชบอร์ด</a> <span>/</span> หมวดหมู่
+  </nav>
+
+  <div class="admin-header">
+    <div>
+      <h1 style="margin:0">หมวดหมู่</h1>
+      <div class="muted-sm">จัดการหมวดหมู่สินค้าทั้งหมดของร้าน</div>
+    </div>
+
+    <div class="header-actions">
+      <div class="search">
+        <input id="q" type="search" class="admin-input" placeholder="ค้นหา: ชื่อหรือ slug">
+        <span class="muted-sm">ทั้งหมด <b id="totalCount"><%= (categories && categories.length) || 0 %></b> รายการ</span>
+      </div>
+      <a class="admin-btn" href="/admin/categories/new">เพิ่มหมวดหมู่</a>
+    </div>
+  </div>
+
+  <% if (errors) { %>
+    <div class="admin-alert admin-alert--danger"><%= errors %></div>
+  <% } %>
+
+  <div class="cat-layout">
+    <!-- LIST -->
+    <section>
+      <% if (!categories || !categories.length) { %>
+        <div class="admin-card"><p class="muted">ยังไม่มีหมวดหมู่</p></div>
+      <% } else { %>
+        <div class="table-wrap" aria-label="ตารางหมวดหมู่">
+          <table class="admin-table" id="catTable">
+            <thead>
+              <tr>
+                <th style="width:72px;">#</th>
+                <th>ชื่อ</th>
+                <th style="width:30%;">Slug</th>
+                <th style="width:180px;text-align:right;">จัดการ</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% categories.forEach(c => { %>
+                <tr data-name="<%= c.name %>" data-slug="<%= c.slug %>">
+                  <td><%= c.id %></td>
+                  <td><strong><%= c.name %></strong></td>
+                  <td><span class="slug-badge"><code><%= c.slug %></code></span></td>
+                  <td style="text-align:right;">
+                    <a class="admin-btn admin-btn--sm" href="/admin/categories/<%= c.id %>/edit">แก้ไข</a>
+                    <form method="post" action="/admin/categories/<%= c.id %>/delete" style="display:inline;"
+                          onsubmit="return confirm('ยืนยันลบหมวดหมู่: <%= c.name.replace(/'/g,'\\\'') %>?');">
+                      <% if (typeof csrfToken !== 'undefined' && csrfToken) { %>
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                      <% } %>
+                      <button class="admin-btn admin-btn--danger admin-btn--sm" type="submit">ลบ</button>
+                    </form>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- mobile cards -->
+        <div class="card-list" id="cardList" hidden>
+          <% categories.forEach(c => { %>
+            <div class="cat-card" data-name="<%= c.name %>" data-slug="<%= c.slug %>">
+              <div class="row">
+                <strong>#<%= c.id %> • <%= c.name %></strong>
+                <span class="slug-badge"><code><%= c.slug %></code></span>
+              </div>
+              <div class="meta help">ระบุ slug เพื่อให้ลิงก์อ่านง่าย</div>
+              <div class="actions">
+                <a class="admin-btn admin-btn--sm" href="/admin/categories/<%= c.id %>/edit">แก้ไข</a>
+                <form method="post" action="/admin/categories/<%= c.id %>/delete" onsubmit="return confirm('ยืนยันลบหมวดหมู่: <%= c.name.replace(/'/g,'\\\'') %>?');">
+                  <% if (typeof csrfToken !== 'undefined' && csrfToken) { %>
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <% } %>
+                  <button class="admin-btn admin-btn--danger admin-btn--sm" type="submit">ลบ</button>
+                </form>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      <% } %>
+    </section>
+
+    <!-- SIDE: Quick add -->
+    <aside class="side-card">
+      <h3 style="margin:0 0 8px;">เพิ่มหมวดหมู่ด่วน</h3>
+      <form method="post" action="/admin/categories" autocomplete="off">
+        <% if (typeof csrfToken !== 'undefined' && csrfToken) { %>
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <% } %>
+        <div class="row">
+          <label>ชื่อหมวดหมู่
+            <input id="name" name="name" class="admin-input" required placeholder="เช่น กล้องวงจรปิด">
+          </label>
+          <label>Slug
+            <input id="slug" name="slug" class="admin-input" placeholder="เช่น cctv">
+          </label>
+          <button class="admin-btn" type="submit">บันทึก</button>
+        </div>
+        <p class="help" style="margin-top:8px;">* ถ้าไม่กรอก slug ระบบจะสร้างจากชื่อโดยอัตโนมัติ</p>
+      </form>
+
+      <hr style="margin:14px -14px;border:0;border-top:1px solid var(--border)">
+      <div class="help">
+        เคล็ดลับ: ตั้งชื่อสั้น กระชับ เช่น “สายไฟ”, “อุปกรณ์เครือข่าย” และอย่าใช้ซ้ำ เพื่อให้ค้นหาและกรองสินค้าได้ง่าย
+      </div>
+    </aside>
+  </div>
+</main>
+
+<script>
+  // ค้นหาในตาราง/การ์ด
+  (function(){
+    var q = document.getElementById('q');
+    var table = document.getElementById('catTable');
+    var cards = document.getElementById('cardList');
+    var total = document.getElementById('totalCount');
+
+    // toggle card list on mobile (CSS ซ่อน table ไว้แล้ว)
+    if (getComputedStyle(cards).display === 'grid') cards.hidden = false;
+
+    function filter(val){
+      val = (val||'').toLowerCase().trim();
+      var shown = 0;
+
+      // table rows
+      if (table){
+        table.querySelectorAll('tbody tr').forEach(function(tr){
+          var n = (tr.getAttribute('data-name')||'').toLowerCase();
+          var s = (tr.getAttribute('data-slug')||'').toLowerCase();
+          var show = !val || n.includes(val) || s.includes(val);
+          tr.style.display = show ? '' : 'none';
+          if (show) shown++;
+        });
+      }
+      // cards
+      if (cards && !cards.hidden){
+        shown = 0;
+        cards.querySelectorAll('.cat-card').forEach(function(card){
+          var n = (card.getAttribute('data-name')||'').toLowerCase();
+          var s = (card.getAttribute('data-slug')||'').toLowerCase();
+          var show = !val || n.includes(val) || s.includes(val);
+          card.style.display = show ? '' : 'none';
+          if (show) shown++;
+        });
+      }
+      if (total) total.textContent = shown;
+    }
+    q && q.addEventListener('input', function(){ filter(this.value); });
+
+    // auto slug
+    var name = document.getElementById('name');
+    var slug = document.getElementById('slug');
+    function slugify(t){
+      return String(t||'')
+        .trim().toLowerCase()
+        .replace(/[^a-z0-9ก-๙\s-]/g,'')
+        .replace(/\s+/g,'-')
+        .replace(/-+/g,'-')
+        .slice(0,80);
+    }
+    if (name && slug){
+      name.addEventListener('input', function(){
+        if (!slug.value.trim()) slug.value = slugify(this.value);
+      });
+      slug.addEventListener('input', function(){ this.value = slugify(this.value); });
+    }
+  })();
+</script>
+
+<%- include('../partials/foot') %>

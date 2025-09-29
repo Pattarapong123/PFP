@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <title><%= post?.title ? (post.title + ' • Portfolio') : 'Portfolio • PFP' %></title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="icon" type="image/jpeg" href="/images/logo2.jpg" />
+  <style>
+    /* ===== Shell & rhythm ===== */
+    .page-wrap{ padding:24px 0 28px; }
+    .crumbs{
+      display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+      color: var(--muted); font-size:13px; margin: 6px 0 16px;
+    }
+    .crumbs a{ color:var(--muted); text-decoration:none; }
+    .crumbs a:hover{ color:var(--primary); text-decoration:underline; }
+    .crumbs span.sep{ opacity:.5; }
+
+    /* ===== 2-col content ===== */
+    .pd-wrap{
+      display:grid; gap:22px; grid-template-columns: 1.05fr .95fr; align-items:start;
+    }
+    @media (max-width: 900px){ .pd-wrap{ grid-template-columns:1fr; } }
+
+    .pd-card{
+      background:var(--panel); border:1px solid var(--border);
+      border-radius:16px; box-shadow:var(--shadow); padding:16px;
+    }
+
+    /* ===== Title & meta ===== */
+    .pd-title{
+      font-size: clamp(22px, 3.6vw, 32px);
+      font-weight: 900; letter-spacing:.2px; line-height:1.25;
+      margin:4px 0 8px;
+    }
+    .pd-meta{
+      display:flex; gap:12px; flex-wrap:wrap;
+      color:var(--muted); font-size:13px;
+    }
+    .pd-meta code{
+      background: color-mix(in oklab, var(--primary) 10%, transparent);
+      border:1px solid color-mix(in oklab, var(--primary) 18%, var(--border));
+      border-radius:8px; padding:2px 8px; font-weight:700;
+    }
+
+    /* ===== Article content ===== */
+    .pd-content{ margin-top:12px; line-height:1.85; }
+    .pd-content img{
+      max-width:100%; height:auto; border-radius:12px; border:1px solid var(--border);
+      box-shadow: var(--shadow); margin: 8px 0;
+    }
+
+    /* ===== Media / gallery ===== */
+    .pd-hero{
+      width:100%; aspect-ratio: 16/10; object-fit:cover;
+      background:linear-gradient(180deg,#f7f8fc 0%,#fff 100%);
+      border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow);
+      cursor:pointer; transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    }
+    .pd-hero:hover{
+      transform: translateY(-2px);
+      box-shadow: 0 16px 36px rgba(16,24,40,.16);
+      border-color: color-mix(in oklab, var(--primary) 28%, var(--border));
+    }
+    @media (max-width: 900px){ .pd-hero{ aspect-ratio: 4/3; } }
+
+    .pd-thumbs{
+      display:grid; grid-template-columns:repeat(auto-fill,minmax(92px,1fr));
+      gap:8px; margin-top:10px;
+    }
+    .pd-thumb{
+      width:100%; aspect-ratio: 4/3; object-fit:cover;
+      border:1px solid var(--border); border-radius:10px; box-shadow:var(--shadow);
+      cursor:pointer; opacity:.85; transition: transform .12s ease, opacity .12s ease, outline-color .12s ease;
+      background:#fff; outline:2px solid transparent; outline-offset:2px;
+    }
+    .pd-thumb:hover{ transform: translateY(-2px); opacity:1; }
+    .pd-thumb:focus-visible{ outline-color: color-mix(in oklab, var(--primary) 55%, transparent); }
+    .pd-thumb.is-active{ outline-color: var(--primary); opacity:1; }
+
+    /* ===== Inline summary card ===== */
+    .pd-chip{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:6px 10px; border-radius:999px;
+      background: var(--primary-50); color: var(--primary-700);
+      border:1px solid var(--primary-100); font-size:12px; font-weight:800;
+    }
+
+    /* ===== Buttons (local polish to match site) ===== */
+    .btn{
+      display:inline-flex; align-items:center; gap:8px; cursor:pointer;
+      background:#fff; color:inherit; text-decoration:none; font-weight:800;
+      border:1px solid var(--border); border-radius:12px; padding:10px 14px;
+      transition: background .15s ease, border-color .15s ease, transform .03s ease, box-shadow .18s ease;
+    }
+    .btn:hover{ background: var(--neutral-50,#f5f6f8); }
+    .btn:active{ transform: translateY(1px); }
+    .btn--outline{
+      background: transparent; color: var(--primary);
+      border-color: var(--primary);
+    }
+    .btn--outline:hover{
+      background: color-mix(in oklab, var(--primary) 12%, transparent);
+    }
+
+    /* ===== Lightbox ===== */
+    .lb{ width:100%; max-width:min(1120px,92vw); border:none; border-radius:16px; padding:0; }
+    .lb::backdrop{ background:rgba(0,0,0,.6); }
+    .lb-body{ position:relative; background:#000; border-radius:16px; overflow:hidden; }
+    .lb-img{ display:block; width:100%; height:min(76vh,78dvh); object-fit:contain; background:#000; }
+    .lb-nav{
+      position:absolute; inset:0; display:flex; justify-content:space-between; align-items:center; pointer-events:none;
+      padding:0 8px;
+    }
+    .lb-btn{
+      pointer-events:auto; width:44px; height:44px; border-radius:999px;
+      background: color-mix(in oklab,#fff 86%, transparent);
+      border:1px solid var(--border); display:grid; place-items:center;
+      font-size:22px; font-weight:900; cursor:pointer; user-select:none;
+      transition: transform .12s ease, background .12s ease;
+    }
+    .lb-btn:hover{ background: color-mix(in oklab,#fff 96%, transparent); transform: translateY(-1px); }
+    .lb-top{ position:absolute; top:8px; left:0; right:0; display:flex; justify-content:flex-end; padding:0 8px; gap:6px; }
+    .lb-dots{ display:flex; gap:6px; justify-content:center; padding:10px; background:rgba(0,0,0,.35); }
+    .lb-dot{ width:8px; height:8px; border-radius:999px; background:rgba(255,255,255,.65); }
+    .lb-dot.active{ background:#fff; }
+
+    /* Dark-mode subtle lift */
+    @media (prefers-color-scheme: dark){
+      .pd-thumb{ background: #0f1115; }
+      .btn:hover{ background: color-mix(in oklab, var(--neutral) 10%, transparent); }
+    }
+  </style>
+</head>
+<body>
+
+<header class="navbar">
+  <div class="container site-header">
+    <a class="brand" href="/" style="display:flex;align-items:center;">
+      <img src="/images/logo2.jpg" class="brand-logo" alt="PFP Logo">
+    </a>
+    <%
+      const _raw = (path || ''); const _noQuery = _raw.split('?')[0].split('#')[0];
+      const currentPath = _noQuery.replace(/\/+$/,'') || '/';
+      const isAt = (p)=> currentPath===p; const startsAt = (p)=> currentPath===p || currentPath.startsWith(p + '/');
+    %>
+    <nav class="main-nav" style="display:flex;align-items:center;gap:16px;">
+      <a href="/" class="<%= isAt('/') ? 'active' : '' %>">หน้าแรก</a>
+      <a href="/products"  class="<%= startsAt('/products') ? 'active' : '' %>">สินค้า</a>
+      <a href="/portfolio" class="<%= startsAt('/portfolio') ? 'active' : '' %>">ผลงาน</a>
+      <a href="/about"     class="<%= isAt('/about') ? 'active' : '' %>">เกี่ยวกับเรา</a>
+      <a href="/contact"   class="<%= isAt('/contact') ? 'active' : '' %>">ติดต่อเรา</a>
+      <a href="/cart" class="cart-link <%= startsAt('/cart') || startsAt('/checkout') ? 'active' : '' %>">ตะกร้า (<span id="cartCount"><%= cartCount %></span>)</a>
+      <% if (user) { %>
+        <span style="color:var(--muted)">สวัสดี, <%= user.name || user.email %></span>
+        <form method="post" action="/auth/logout" style="margin:0;display:inline;"><button class="btn btn--outline btn--sm">ออกจากระบบ</button></form>
+      <% } else { %><a href="/auth/login">เข้าสู่ระบบ</a><% } %>
+    </nav>
+  </div>
+</header>
+
+<main class="container page-wrap">
+  <nav class="crumbs" aria-label="breadcrumb">
+    <a href="/">หน้าแรก</a><span class="sep">›</span><a href="/portfolio">ผลงาน</a><span class="sep">›</span>
+    <span aria-current="page"><%= post?.title || 'ไม่ระบุชื่อ' %></span>
+  </nav>
+
+  <section class="pd-wrap">
+    <div class="pd-media">
+      <% const hasCover = !!post?.featuredImageUrl; %>
+      <% const hasGallery = Array.isArray(post?.images) && post.images.length > 0; %>
+      <% const heroUrl = hasCover ? post.featuredImageUrl : (hasGallery ? post.images[0].url : null); %>
+
+      <% if (heroUrl) { %>
+        <img id="pd-hero" class="pd-hero" src="<%= heroUrl %>" alt="<%= post.title %>">
+      <% } else { %>
+        <div class="pd-card" style="aspect-ratio:16/10;display:grid;place-items:center;">
+          <div class="admin-empty" style="border-style:dashed;">ยังไม่มีภาพสำหรับผลงานนี้</div>
+        </div>
+      <% } %>
+
+      <div id="pd-thumbs" class="pd-thumbs" style="<%= (hasCover || hasGallery) ? '' : 'display:none;' %>">
+        <% if (hasCover) { %>
+          <img class="pd-thumb is-active" src="<%= post.featuredImageUrl %>" alt="<%= post.title %>">
+        <% } %>
+        <% if (hasGallery) { post.images.forEach(img => { %>
+          <img class="pd-thumb" src="<%= img.url %>" alt="<%= img.altText || post.title %>">
+        <% }) } %>
+      </div>
+
+      <% if (post?.summary) { %>
+        <div class="pd-card" style="margin-top:14px;">
+          <div class="pd-chip"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:currentColor;"></span> สรุปงานโดยย่อ</div>
+          <p class="muted" style="margin:10px 0 0;"><%= post.summary %></p>
+        </div>
+      <% } %>
+    </div>
+
+    <article class="pd-card">
+      <h1 class="pd-title"><%= post?.title || 'ไม่ระบุชื่อ' %></h1>
+
+      <div class="pd-meta">
+        <% if (post?.publishedAt) { %>
+          <span>เผยแพร่:
+            <time datetime="<%= new Date(post.publishedAt).toISOString() %>">
+              <%= new Date(post.publishedAt).toLocaleDateString('th-TH', { day:'numeric', month:'long', year:'numeric' }) %>
+            </time>
+          </span>
+        <% } else { %><span>ยังไม่เผยแพร่</span><% } %>
+        <% if (post?.slug) { %><span>Slug: <code><%= post.slug %></code></span><% } %>
+      </div>
+
+      <div class="pd-content">
+        <% if (post?.content) { %>
+          <%- post.content %>
+        <% } else { %>
+          <p class="muted">ยังไม่มีเนื้อหาในหน้านี้</p>
+        <% } %>
+      </div>
+
+      <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
+        <a class="btn btn--outline" href="/portfolio">← กลับไปหน้ารายการผลงาน</a>
+        <a class="btn" href="/">กลับหน้าแรก</a>
+      </div>
+    </article>
+  </section>
+</main>
+
+<footer class="container" style="padding:24px 0;color:var(--muted);">
+  © <%= new Date().getFullYear() %> PFP — All rights reserved.
+</footer>
+
+<!-- Lightbox -->
+<dialog id="pd-lightbox" class="lb" aria-label="ตัวอย่างรูปผลงาน">
+  <div class="lb-body">
+    <div class="lb-top"><button type="button" class="lb-btn" data-close title="ปิด">✕</button></div>
+    <img id="lb-img" class="lb-img" alt="">
+    <div class="lb-nav">
+      <button type="button" class="lb-btn" data-prev title="ก่อนหน้า">‹</button>
+      <button type="button" class="lb-btn" data-next title="ถัดไป">›</button>
+    </div>
+  </div>
+  <div id="lb-dots" class="lb-dots"></div>
+</dialog>
+
+<script>
+  (function(){
+    var imgs = <%- JSON.stringify(
+      [
+        ...(post?.featuredImageUrl ? [{ url: post.featuredImageUrl, alt: post?.title || '' }] : []),
+        ...((Array.isArray(post?.images) ? post.images : []).map(i => ({ url: i.url, alt: i.altText || post?.title || '' })))
+      ]
+    ) %>;
+    if (!imgs.length) return;
+
+    var hero = document.getElementById('pd-hero');
+    var dlg  = document.getElementById('pd-lightbox');
+    var lbImg = document.getElementById('lb-img');
+    var dots = document.getElementById('lb-dots');
+    var thumbsWrap = document.getElementById('pd-thumbs');
+
+    var idx = 0;
+    function clamp(n,a,b){ return Math.max(a, Math.min(b,n)); }
+    function openAt(i){ idx = clamp(i,0,imgs.length-1); render(); if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open',''); }
+    function render(){ var it = imgs[idx]; lbImg.src = it.url; lbImg.alt = it.alt || ''; renderDots(); }
+    function renderDots(){
+      dots.innerHTML = '';
+      imgs.forEach(function(_it,i){
+        var d=document.createElement('div');
+        d.className='lb-dot'+(i===idx?' active':'');
+        d.addEventListener('click',function(){ idx=i; render(); });
+        dots.appendChild(d);
+      });
+      dots.style.display = imgs.length>1 ? 'flex' : 'none';
+    }
+    function next(){ idx = (idx+1)%imgs.length; render(); }
+    function prev(){ idx = (idx-1+imgs.length)%imgs.length; render(); }
+
+    if (hero) hero.addEventListener('click', function(){ openAt(0); });
+    if (thumbsWrap){
+      Array.from(thumbsWrap.children).forEach(function(el, i){
+        el.addEventListener('click', function(){
+          openAt(i);
+          Array.from(thumbsWrap.children).forEach(function(t){ t.classList.remove('is-active'); });
+          el.classList.add('is-active');
+        });
+      });
+    }
+    dlg.addEventListener('click', function(e){
+      if (e.target.closest('[data-close]')) dlg.close();
+      else if (e.target.closest('[data-next]')) next();
+      else if (e.target.closest('[data-prev]')) prev();
+    });
+    document.addEventListener('keydown', function(e){
+      if (!dlg.open) return;
+      if (e.key==='Escape') dlg.close();
+      if (e.key==='ArrowRight') next();
+      if (e.key==='ArrowLeft') prev();
+    });
+  })();
+</script>
+
+</body>
+</html>

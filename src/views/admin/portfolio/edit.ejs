@@ -1,0 +1,188 @@
+<!-- src/views/admin/portfolio/edit.ejs -->
+<%- include('../partials/head', { title: `แก้ไขผลงาน • ${post.title}` }) %>
+
+<a href="/admin/portfolio" class="admin-btn admin-btn--ghost" style="margin-bottom:14px">&larr; กลับ</a>
+
+<style>
+  /* Layout */
+  .pf-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:18px}
+  @media (max-width: 980px){.pf-grid{grid-template-columns:1fr}}
+
+  /* Card polish */
+  .pf-card{background:var(--panel);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:16px}
+  .pf-title{margin:0 0 10px;font-size:18px;font-weight:800}
+  .pf-sub{margin:12px 0 6px;color:var(--muted);font-weight:700;letter-spacing:.2px}
+
+  /* Fields */
+  .pf-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media (max-width: 700px){.pf-grid-2{grid-template-columns:1fr}}
+  .pf-field{display:flex;flex-direction:column;gap:6px}
+  .pf-field>label{font-weight:700}
+  .pf-input,.pf-textarea,.pf-select{background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+  .pf-textarea{min-height:140px}
+
+  /* Preview */
+  .pf-cover{width:100%;max-width:280px;height:180px;object-fit:cover;border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow)}
+
+  /* Gallery */
+  .pf-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+  .pf-thumb{position:relative;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--surface)}
+  .pf-thumb img{width:100%;aspect-ratio:1/1;object-fit:cover;display:block}
+  .pf-thumb .pf-chip{position:absolute;left:8px;top:8px;background:rgba(0,0,0,.5);color:#fff;border-radius:999px;padding:2px 8px;font-size:.8rem}
+  .pf-thumb .pf-del{position:absolute;right:8px;top:8px;display:inline-flex;align-items:center;gap:6px;
+    background:#ef4444;border:1px solid #ef4444;color:#fff;padding:6px 10px;border-radius:10px;cursor:pointer}
+  .pf-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+
+  /* Help text */
+  .pf-muted{color:var(--muted);font-size:.92rem}
+  .pf-hr{border:none;border-top:1px dashed var(--border);margin:14px 0}
+</style>
+
+<div class="pf-grid">
+  <!-- ซ้าย: ฟอร์มหลัก -->
+  <section class="pf-card">
+    <h2 class="pf-title">แก้ไขผลงาน</h2>
+
+    <% if (errors) { %>
+      <div class="pf-card" style="border-color:color-mix(in oklab, var(--danger) 35%, var(--border));margin:0 0 12px 0">
+        <div style="color:var(--danger-600)"><%= errors %></div>
+      </div>
+    <% } %>
+
+    <form method="post" action="/admin/portfolio/<%= post.id %>" enctype="multipart/form-data">
+      <!-- CSRF -->
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+      <div class="pf-field">
+        <label>ชื่อผลงาน</label>
+        <input class="pf-input" name="title" value="<%= post.title %>" required>
+      </div>
+
+      <div class="pf-grid-2">
+        <div class="pf-field">
+          <label>Slug</label>
+          <input class="pf-input" name="slug" value="<%= post.slug %>">
+          <div class="pf-muted">ปล่อยว่างเพื่อให้ระบบสร้างจากชื่อ</div>
+        </div>
+        <div class="pf-field">
+          <label>สรุป</label>
+          <input class="pf-input" name="summary" value="<%= post.summary || '' %>">
+        </div>
+      </div>
+
+      <div class="pf-field">
+        <label>รายละเอียด</label>
+        <textarea class="pf-textarea" name="content"><%= post.content || '' %></textarea>
+      </div>
+
+      <hr class="pf-hr">
+
+      <div class="pf-grid-2">
+        <div class="pf-field">
+          <label>ภาพหน้าปก (อัปโหลดใหม่เพื่อเปลี่ยน)</label>
+          <% if (post.featuredImageUrl) { %>
+            <img src="<%= post.featuredImageUrl %>" alt="cover" class="pf-cover" id="cover-current">
+          <% } %>
+          <input type="file" name="featuredFile" accept="image/*" class="pf-input" id="cover-file">
+          <img id="cover-preview" class="pf-cover" style="display:none;margin-top:8px;">
+          <div class="pf-muted">รองรับ JPG/PNG/WEBP (≤ 5MB)</div>
+        </div>
+
+        <div class="pf-field">
+          <label>เพิ่มรูปเข้าแกลเลอรี</label>
+          <input type="file" name="galleryFiles" accept="image/*" multiple class="pf-input" id="gallery-files">
+          <div class="pf-muted">เลือกหลายไฟล์ได้ (ต่อท้ายลำดับเดิม)</div>
+          <div id="gallery-previews" class="pf-gallery" style="margin-top:6px;"></div>
+        </div>
+      </div>
+
+      <div class="pf-actions">
+        <button class="admin-btn" type="submit">บันทึกการเปลี่ยนแปลง</button>
+        <a class="admin-btn admin-btn--ghost" href="/admin/portfolio">ยกเลิก</a>
+        <a class="admin-btn" href="/portfolio/<%= post.slug %>" target="_blank" rel="noreferrer">ดูหน้าเว็บ</a>
+      </div>
+    </form>
+  </section>
+
+  <!-- ขวา: แกลเลอรีเดิม -->
+  <section class="pf-card">
+    <h2 class="pf-title">แกลเลอรีเดิม</h2>
+
+    <% if (!post.images || post.images.length === 0) { %>
+      <div class="pf-muted">ยังไม่มีรูปในแกลเลอรี</div>
+    <% } else { %>
+      <div class="pf-gallery">
+        <% post.images.forEach(function(img){ %>
+          <div class="pf-thumb">
+            <span class="pf-chip">order <%= img.sortOrder %></span>
+            <img src="<%= img.url %>" alt="">
+            <form method="post"
+                  action="/admin/portfolio/<%= post.id %>/images/<%= img.id %>/delete"
+                  onsubmit="return confirm('ลบรูปนี้ออกจากแกลเลอรี?');">
+              <!-- CSRF -->
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <button class="pf-del" type="submit" title="ลบรูปนี้">ลบ</button>
+            </form>
+          </div>
+        <% }) %>
+      </div>
+
+      <details style="margin-top:12px">
+        <summary class="pf-muted">ปรับลำดับรูป (ใส่เลข sortOrder ใหม่)</summary>
+        <form method="post" action="/admin/portfolio/<%= post.id %>/images/sort" style="margin-top:8px">
+          <!-- CSRF -->
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+          <div class="pf-grid-2" style="gap:8px">
+            <% (post.images || []).forEach(function(img, idx){ %>
+              <div class="pf-field">
+                <label>#<%= img.id %></label>
+                <input class="pf-input" type="number" name="items[<%= idx %>][sortOrder]" value="<%= img.sortOrder %>">
+                <input type="hidden" name="items[<%= idx %>][id]" value="<%= img.id %>">
+              </div>
+            <% }) %>
+          </div>
+          <button class="admin-btn" style="margin-top:8px">บันทึกลำดับ</button>
+        </form>
+      </details>
+    <% } %>
+  </section>
+</div>
+
+<script>
+  // Preview cover
+  (function(){
+    const file = document.getElementById('cover-file');
+    const prev = document.getElementById('cover-preview');
+    const cur  = document.getElementById('cover-current');
+    if(!file) return;
+    file.addEventListener('change', ()=>{
+      const f = file.files && file.files[0];
+      if(!f){ prev.style.display='none'; if(cur) cur.style.opacity=1; return; }
+      prev.src = URL.createObjectURL(f);
+      prev.style.display='block';
+      if(cur) cur.style.opacity = .35;
+    });
+  })();
+
+  // Preview gallery multiple
+  (function(){
+    const files = document.getElementById('gallery-files');
+    const wrap  = document.getElementById('gallery-previews');
+    if(!files || !wrap) return;
+    files.addEventListener('change', ()=>{
+      wrap.innerHTML = '';
+      Array.from(files.files||[]).forEach(f=>{
+        if(!f.type.startsWith('image/')) return;
+        const box = document.createElement('div');
+        box.className = 'pf-thumb';
+        const img = new Image();
+        img.src = URL.createObjectURL(f);
+        box.appendChild(img);
+        wrap.appendChild(box);
+      });
+    });
+  })();
+</script>
+
+<%- include('../partials/foot') %>

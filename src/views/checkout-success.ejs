@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <title>สั่งซื้อสำเร็จ • PFP</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <%- include('partials/header') %>
+  <main class="container" style="padding:24px 0;">
+    <div class="card" style="text-align:center">
+      <h1>สั่งซื้อสำเร็จ 🎉</h1>
+      <p>รหัสคำสั่งซื้อ: <strong>#<%= orderId %></strong></p>
+      <p>ยอดรวม: <strong><%= total.toLocaleString('th-TH', {minimumFractionDigits:2}) %> ฿</strong></p>
+      <div style="margin-top:14px; display:flex; gap:10px; justify-content:center;">
+        <a class="btn btn--primary" href="/orders/mine">ดูออเดอร์ของฉัน</a>
+        <a class="btn" href="/">กลับหน้าแรก</a>
+      </div>
+    </div>
+  </main>
+  <%- include('partials/footer') %>
+</body>
+</html>

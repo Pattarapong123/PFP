@@ -1,0 +1,13 @@
+<aside class="admin-sidebar">
+  <div class="admin-brand">PFP Admin</div>
+  <nav class="admin-nav">
+    <a href="/admin" class="<%= path === '/admin' ? 'active' : '' %>">ภาพรวม</a>
+    <a href="/admin/products" class="<%= path.startsWith('/admin/products') ? 'active' : '' %>">สินค้า</a>
+    <a href="/admin/orders" class="<%= path.startsWith('/admin/orders') ? 'active' : '' %>">ออเดอร์</a>
+    <a href="/admin/portfolio" class="<%= path.startsWith('/admin/portfolio') ? 'active' : '' %>">ผลงาน</a>
+
+    <form method="post" action="/admin/logout" style="margin-top:10px">
+      <button class="btn btn--soft-danger btn--block" type="submit">ออกจากระบบ</button>
+    </form>
+  </nav>
+</aside>

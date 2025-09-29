@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>ติดต่อเรา • <%= (typeof siteName !== 'undefined' && siteName) ? siteName : 'PFP ENGINEERING' %></title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="icon" type="images/jpeg" href="/images/logo2.jpg">
+</head>
+<body>
+  <%- include('partials/header') %>
+
+  <main class="container" style="padding:24px 0;">
+    <!-- Heading -->
+    <section style="display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:14px;">
+      <div>
+        <h1 style="margin:0;">ติดต่อเรา</h1>
+        <p style="margin:0;color:var(--muted)">
+          ต้องการใบเสนอราคา ปรึกษาโซลูชัน หรือซัพพอร์ตระบบ ยินดีให้คำแนะนำครับ
+        </p>
+      </div>
+    </section>
+
+    <!-- 2-Column: Contact Info + LINE QR -->
+    <section class="grid" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr));align-items:start;gap:20px;">
+      <!-- Contact Info Card -->
+      <div class="card" style="display:flex;flex-direction:column;gap:14px;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <img src="/images/logo3.jpg" alt="PFP ENGINEERING" style="height:64px;width:auto;object-fit:contain;border-radius:10px;">
+          <div>
+            <h2 style="margin:0 0 4px;font-size:20px;">PFP ENGINEERING</h2>
+            <span class="badge">พร้อมให้คำปรึกษา</span>
+          </div>
+        </div>
+
+        <div style="display:grid;gap:10px;margin-top:8px;">
+          <!-- Emails -->
+          <a href="mailto:pfp.service01@gmail.com" class="card" style="display:flex;align-items:center;gap:12px;padding:10px 12px;text-decoration:none;">
+            <div style="font-weight:700;">E-mail</div>
+            <div style="color:var(--muted);">pfp.service01@gmail.com</div>
+          </a>
+
+          <a href="mailto:Pmeekit.pfp@gmail.com" class="card" style="display:flex;align-items:center;gap:12px;padding:10px 12px;text-decoration:none;">
+            <div style="font-weight:700;">E-mail</div>
+            <div style="color:var(--muted);">Pmeekit.pfp@gmail.com</div>
+          </a>
+
+          <!-- Phones -->
+          <a href="tel:0991351328" class="card" style="display:flex;align-items:center;gap:12px;padding:10px 12px;text-decoration:none;">
+            <div style="font-weight:700;">โทร</div>
+            <div style="color:var(--muted);">099-135-1328</div>
+          </a>
+          <a href="tel:0875362224" class="card" style="display:flex;align-items:center;gap:12px;padding:10px 12px;text-decoration:none;">
+            <div style="font-weight:700;">โทร</div>
+            <div style="color:var(--muted);">087-536-2224</div>
+          </a>
+          <a href="tel:0832931396" class="card" style="display:flex;align-items:center;gap:12px;padding:10px 12px;text-decoration:none;">
+            <div style="font-weight:700;">โทร</div>
+            <div style="color:var(--muted);">083-293-1396</div>
+          </a>
+        </div>
+
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:4px;">
+          <a href="mailto:pfp.service01@gmail.com" class="btn">ส่งอีเมลหาเรา</a>
+          <a href="tel:0991351328" class="btn" style="background:transparent;color:var(--primary);border:1px solid var(--primary);">โทรเลย</a>
+        </div>
+      </div>
+
+      <!-- LINE QR Card -->
+      <div class="card" style="display:grid;gap:12px;justify-items:center;text-align:center;">
+        <h2 style="margin:0;font-size:20px;">แสกนเพื่อแชท (LINE)</h2>
+        <img src="/images/line.jpg" alt="LINE QR Code"
+             style="width:min(320px,100%);aspect-ratio:1/1;object-fit:contain;border-radius:12px;border:1px solid var(--border);box-shadow:var(--shadow);background:var(--panel);">
+        <p style="color:var(--muted);margin:0;">
+          เปิดกล้องหรือแอป LINE แล้วสแกนเพื่อคุยกับเราได้ทันที
+        </p>
+      </div>
+    </section>
+
+    <!-- Extra info -->
+    <section class="card" style="margin-top:18px;">
+      <div style="display:grid;gap:6px;">
+        <span class="badge">ข้อมูลเพิ่มเติม</span>
+        <p style="margin:0;color:var(--muted)">
+          เวลาทำการ: จันทร์–ศุกร์ 09:00–18:00 น. (นอกเวลาให้ฝากข้อความไว้ได้เสมอ)
+        </p>
+      </div>
+    </section>
+    </section>
+  </main>
+
+  <%- include('partials/footer') %>
+</body>
+</html>

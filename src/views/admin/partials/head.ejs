@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <title><%= typeof title !== 'undefined' ? title : 'Admin • PFP' %></title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/styles.css" />
+
+  <!-- ใช้ logo2.jpg เป็น favicon -->
+  <link rel="icon" type="image/jpeg" href="/images/logo2.jpg">
+</head>
+<body>
+  <!-- แถบ Admin-nav -->
+  <header>
+    <div class="site-header">
+      <a href="/" class="brand" style="display:flex;align-items:center;gap:10px;">
+        <img src="/images/logo2.jpg"
+             class="brand-logo"
+             alt="PFP Logo">
+      </a>
+
+      <nav class="main-nav" style="gap:18px;">
+        <a href="/admin" class="<%= path === '/admin' ? 'active' : '' %>">แดชบอร์ด</a>
+
+        <a href="/admin/products"
+           class="<%= path && path.startsWith('/admin/products') ? 'active' : '' %>">
+          สินค้า
+        </a>
+
+        <a href="/admin/orders"
+           class="<%= path && path.startsWith('/admin/orders') ? 'active' : '' %>">
+          ออเดอร์
+        </a>
+
+        <a href="/admin/portfolio"
+           class="<%= path && path.startsWith('/admin/portfolio') ? 'active' : '' %>">
+          ผลงาน
+        </a>
+
+        <a href="/admin/stock"
+           class="<%= path && path.startsWith('/admin/stock') ? 'active' : '' %>">
+          สต๊อกสินค้า
+        </a>
+
+        <a href="/admin/units"
+           class="<%= path && path.startsWith('/admin/units') ? 'active' : '' %>">
+          หน่วยนับ
+        </a>
+
+        <a href="/admin/categories"
+           class="<%= path && path.startsWith('/admin/categories') ? 'active' : '' %>">
+          หมวดหมู่
+        </a>
+
+        <!-- แก้เงื่อนไข active ให้ถูกเส้นทาง -->
+        <a href="/admin/users"
+           class="<%= path && path.startsWith('/admin/users') ? 'active' : '' %>">
+          จัดการผู้ใช้
+        </a>
+
+
+
+        <% if (admin) { %>
+          <form method="post" action="/admin/logout" style="margin:0">
+            <button class="btn"
+                    style="background:transparent;color:var(--primary);border:1px solid var(--primary);padding:8px 12px">
+              ออกจากระบบ
+            </button>
+          </form>
+        <% } else { %>
+          <a href="/admin/login">เข้าสู่ระบบ</a>
+        <% } %>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container" style="padding:24px 0;">

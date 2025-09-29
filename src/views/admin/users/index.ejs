@@ -1,0 +1,95 @@
+<%- include('../partials/head', { title: 'ผู้ใช้ • PFP' }) %>
+<style>
+  .filter-bar{ display:flex; gap:10px; flex-wrap:wrap; margin:10px 0 14px; }
+  .filter-bar input, .filter-bar select{ height:36px; padding:6px 10px; border:1px solid var(--border); border-radius:8px; }
+  .btn-sm{ padding:6px 12px; border-radius:8px; font-size:14px; }
+  .admin-table th, .admin-table td{ text-align:left; vertical-align:middle; }
+  .admin-table th.num,.admin-table td.num{ text-align:right; white-space:nowrap; }
+  .role{ font-weight:900; padding:4px 8px; border:1px solid var(--border); border-radius:999px; }
+</style>
+
+<main class="admin-main">
+  <div class="page-header">
+    <div>
+      <nav class="admin-breadcrumbs"><a href="/admin">แดชบอร์ด</a> <span>/</span> <span>ผู้ใช้</span></nav>
+      <h1>ผู้ใช้</h1>
+      <div style="color:var(--muted); font-size:13px; margin-top:4px;">
+        แสดง <%= from %>–<%= to %> จาก <%= total.toLocaleString('th-TH') %> รายการ
+        (หน้า <%= page %>/<%= totalPages %>, ต่อหน้า <%= pageSize %>)
+      </div>
+    </div>
+    <div>
+      <a href="/admin/users/new" class="admin-btn btn-sm">+ เพิ่มผู้ใช้</a>
+    </div>
+  </div>
+
+  <form class="filter-bar" method="get" action="/admin/users">
+    <input type="hidden" name="size" value="<%= pageSize %>">
+    <input type="text" name="q" value="<%= q||'' %>" placeholder="ค้นหาชื่อหรืออีเมล">
+    <select name="role">
+      <option value="">ทุก Role</option>
+      <% ['ADMIN','STAFF','CUSTOMER'].forEach(r => { %>
+        <option value="<%= r %>" <%= role===r ? 'selected':'' %>><%= r %></option>
+      <% }) %>
+    </select>
+    <button class="admin-btn btn-sm" type="submit">ค้นหา</button>
+    <% if ((q&&q.length) || (role&&role.length)) { %>
+      <a class="admin-btn btn-sm" href="/admin/users">รีเซ็ต</a>
+    <% } %>
+  </form>
+
+  <section class="admin-card" style="padding:0;">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th style="width:80px;">#</th>
+          <th>อีเมล</th>
+          <th>ชื่อ</th>
+          <th style="width:120px;">Role</th>
+          <th class="num" style="width:180px;">สร้างเมื่อ</th>
+          <th style="width:200px;">จัดการ</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (!users.length) { %>
+          <tr><td colspan="6" style="text-align:center; padding:18px; color:var(--muted);">ไม่มีข้อมูล</td></tr>
+        <% } %>
+        <% users.forEach(u => { %>
+          <tr>
+            <td><%= u.id %></td>
+            <td class="mono"><%= u.email %></td>
+            <td><%= u.name %></td>
+            <td><span class="role"><%= u.role %></span></td>
+            <td class="num"><%= new Date(u.createdAt).toLocaleString('th-TH') %></td>
+            <td>
+              <div class="admin-btn-group">
+                <a class="admin-btn admin-btn--soft btn-sm" href="/admin/users/<%= u.id %>/edit">แก้ไข</a>
+                <form method="post" action="/admin/users/<%= u.id %>/delete" style="display:inline;"
+                      onsubmit="return confirm('ยืนยันลบผู้ใช้ #<%= u.id %>?');">
+                  <button class="admin-btn admin-btn--danger btn-sm" type="submit">ลบ</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </section>
+
+  <% if (totalPages > 1) { %>
+    <nav class="admin-pagination" style="margin-top:12px;">
+      <% const base = `/admin/users?q=${encodeURIComponent(q||'')}&role=${encodeURIComponent(role||'')}`;
+         const makeUrl = (p) => `${base}&page=${p}&size=${pageSize}`; %>
+      <a href="<%= makeUrl(1) %>">«</a>
+      <a href="<%= makeUrl(Math.max(1,page-1)) %>">‹</a>
+      <% const win=2, st=Math.max(1,page-win), en=Math.min(totalPages,page+win);
+         for(let p=st;p<=en;p++){ %>
+        <% if (p===page) { %><span class="current"><%= p %></span><% } else { %>
+          <a href="<%= makeUrl(p) %>"><%= p %></a><% } %>
+      <% } %>
+      <a href="<%= makeUrl(Math.min(totalPages,page+1)) %>">›</a>
+      <a href="<%= makeUrl(totalPages) %>">»</a>
+    </nav>
+  <% } %>
+</main>
+<%- include('../partials/foot') %>

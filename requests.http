@@ -1,0 +1,17 @@
+### Home
+GET http://localhost:3000/
+
+### List products
+GET http://localhost:3000/products
+
+### Product detail
+GET http://localhost:3000/products/managed-vps-hosting-basic
+
+### Portfolio list
+GET http://localhost:3000/portfolio
+
+### Add to cart
+POST http://localhost:3000/cart/add
+Content-Type: application/json
+
+{ "productId": 1, "qty": 2 }

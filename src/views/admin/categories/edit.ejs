@@ -1,0 +1,31 @@
+<%- include('../partials/head', { title: `แก้ไขหมวดหมู่ #${category.id} • Admin` }) %>
+<main class="admin-main">
+  <nav class="admin-breadcrumbs"><a href="/admin">แดชบอร์ด</a> <span>/</span> <a href="/admin/categories">หมวดหมู่</a> <span>/</span> แก้ไข</nav>
+  <h1>แก้ไขหมวดหมู่ #<%= category.id %></h1>
+
+  <% if (errors) { %>
+    <div class="admin-alert admin-alert--danger"><%= errors %></div>
+  <% } %>
+
+  <section class="admin-card" style="max-width:560px;">
+    <form class="admin-form" method="post" action="/admin/categories/<%= category.id %>">
+      <div class="admin-field">
+        <label>ชื่อหมวดหมู่</label>
+        <input class="admin-input" name="name" value="<%= category.name %>" required>
+      </div>
+      <div class="admin-field">
+        <label>Slug</label>
+        <input class="admin-input" name="slug" value="<%= category.slug %>">
+      </div>
+      <div class="admin-field">
+        <label>คำอธิบาย</label>
+        <textarea class="admin-textarea" name="description" rows="3"><%= category.description || '' %></textarea>
+      </div>
+      <div class="admin-btn-group">
+        <button class="admin-btn" type="submit">บันทึก</button>
+        <a class="admin-btn admin-btn--ghost" href="/admin/categories">ยกเลิก</a>
+      </div>
+    </form>
+  </section>
+</main>
+<%- include('../partials/foot') %>
