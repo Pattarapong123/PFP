@@ -80,8 +80,8 @@
       <div class="pf-grid-2">
         <div class="pf-field">
           <label>ภาพหน้าปก (อัปโหลดใหม่เพื่อเปลี่ยน)</label>
-          <% if (post.featuredImageUrl) { %>
-            <img src="<%= post.featuredImageUrl %>" alt="cover" class="pf-cover" id="cover-current">
+          <% if (post.featuredImage) { %>
+            <img src="<%= post.featuredImage %>" alt="cover" class="pf-cover" id="cover-current">
           <% } %>
           <input type="file" name="featuredFile" accept="image/*" class="pf-input" id="cover-file">
           <img id="cover-preview" class="pf-cover" style="display:none;margin-top:8px;">

@@ -30,7 +30,6 @@ if (!process.env.PRISMA_CLIENT_ENGINE_TYPE) {
 const { default: prismaModule } = await import('@prisma/client');
 const { PrismaClient } = prismaModule;
 
-
 // สร้าง Prisma client
 const prisma = new PrismaClient();
 
@@ -39,8 +38,6 @@ const PORT = process.env.PORT || 3000;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-
 
 // ===== Ensure uploads dir exists =====
 const uploadsDir = path.join(__dirname, '..', 'public', 'uploads');
@@ -363,7 +360,30 @@ function requireAdmin(req, res, next) {
 }
 
 // ===== Public routes =====
-app.get('/', (_req, res) => res.render('home'));
+// หน้าแรก: ดึงผลงานล่าสุดมาโชว์เป็น "โครงการของเรา"
+app.get('/', async (_req, res, next) => {
+  try {
+    const posts = await prisma.portfolio.findMany({
+      orderBy: [{ publishedAt: 'desc' }, { id: 'desc' }],
+      take: 6,
+      include: { images: { orderBy: { sortOrder: 'asc' } } },
+    });
+
+    // เตรียม cover (ใช้ featuredImage ถ้ามี, ไม่งั้นใช้รูปแรก)
+    const projects = posts.map(p => ({
+      id: p.id,
+      slug: p.slug,
+      title: p.title,
+      publishedAt: p.publishedAt,
+      cover:
+        (p.featuredImage && p.featuredImage.trim()) ||
+        (p.images?.[0]?.url || '/images/placeholder-wide.jpg'),
+    }));
+
+    res.render('home', { projects });
+  } catch (e) { next(e); }
+});
+
 
 // Products (public list)
 app.get('/products', async (req, res, next) => {
@@ -1087,7 +1107,7 @@ app.post('/admin/products', upload.single('imageFile'), async (req, res, next) =
       },
     });
 
-    // explicit m2m (ลบ skipDuplicates ออก)
+    // explicit m2m
     if (categoryIds.length) {
       await prisma.productCategory.createMany({
         data: categoryIds.map(id => ({ productId: created.id, categoryId: id })),
@@ -1274,6 +1294,7 @@ app.post('/admin/units/:id/delete', async (req, res, next) => {
     res.redirect('/admin/units');
   } catch (e) { next(e); }
 });
+
 // ===== Admin: Categories =====
 app.get('/admin/categories', async (_req, res, next) => {
   try {
@@ -1374,7 +1395,6 @@ app.post('/admin/categories/:id/delete', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
-
 // ===== Admin: Portfolio =====
 app.get('/admin/portfolio', async (_req, res, next) => {
   try {
@@ -1388,41 +1408,108 @@ app.get('/admin/portfolio', async (_req, res, next) => {
 app.get('/admin/portfolio/new', (_req, res) => {
   res.render('admin/portfolio/new', { errors: null, values: {} });
 });
-app.post('/admin/portfolio', upload.array('images', 12), async (req, res, next) => {
-  try {
-    const { title, slug, body, publishedAt } = req.body;
-    if (!title?.trim()) {
-      return res.status(400).render('admin/portfolio/new', {
-        errors: 'กรุณากรอกชื่อผลงาน',
-        values: req.body,
-      });
-    }
-    const finalSlug = slug?.trim() ? slugify(slug) : slugify(title);
-    const images = (req.files || []).map((f, idx) => ({ url: `/uploads/${f.filename}`, sortOrder: idx + 1 }));
 
-    const created = await prisma.portfolio.create({
-      data: {
-        title: title.trim(),
-        slug: finalSlug,
-        body: body || '',
-        publishedAt: publishedAt ? new Date(publishedAt) : new Date(),
-        images: images.length ? { create: images } : undefined,
-      },
-      include: { images: true },
-    });
+// ใช้ fields: cover 1 รูป + gallery หลายรูป
+app.post(
+  '/admin/portfolio',
+  upload.fields([
+    { name: 'featuredFile', maxCount: 1 },
+    { name: 'galleryFiles', maxCount: 20 },
+  ]),
+  async (req, res, next) => {
+    try {
+      const { title, slug, body, publishedAt } = req.body;
+      if (!title?.trim()) {
+        return res.status(400).render('admin/portfolio/new', {
+          errors: 'กรุณากรอกชื่อผลงาน',
+          values: req.body,
+        });
+      }
 
-    await addLog('portfolio', 'created', created.id, `เพิ่มผลงาน: ${created.title}`);
-    res.redirect('/admin/portfolio');
-  } catch (e) {
-    if (String(e).includes('Unique') || String(e?.message || '').includes('Unique')) {
-      return res.status(400).render('admin/portfolio/new', {
-        errors: 'Slug ซ้ำกับผลงานอื่น กรุณาเปลี่ยน',
-        values: req.body,
+      const finalSlug = slug?.trim() ? slugify(slug) : slugify(title);
+
+      // cover (1 รูป)
+      const coverFile = req.files?.featuredFile?.[0] || null;
+      const featuredImage = coverFile ? `/uploads/${coverFile.filename}` : null;
+
+      // gallery (หลายรูป)
+      const images = (req.files?.galleryFiles || []).map((f, idx) => ({
+        url: `/uploads/${f.filename}`,
+        sortOrder: idx + 1,
+      }));
+
+      const created = await prisma.portfolio.create({
+        data: {
+          title: title.trim(),
+          slug: finalSlug,
+          body: body || '',
+          publishedAt: publishedAt ? new Date(publishedAt) : new Date(),
+          featuredImage,
+          images: images.length ? { create: images } : undefined,
+        },
+        include: { images: true },
       });
+
+      await addLog('portfolio', 'created', created.id, `เพิ่มผลงาน: ${created.title}`);
+      res.redirect('/admin/portfolio');
+    } catch (e) {
+      if (String(e).includes('Unique') || String(e?.message || '').includes('Unique')) {
+        return res.status(400).render('admin/portfolio/new', {
+          errors: 'Slug ซ้ำกับผลงานอื่น กรุณาเปลี่ยน',
+          values: req.body,
+        });
+      }
+      next(e);
     }
-    next(e);
   }
-});
+);
+
+// แก้ไขข้อมูลหลัก + อัปโหลดรูปเพิ่มได้
+app.post(
+  '/admin/portfolio/:id',
+  upload.fields([
+    { name: 'featuredFile', maxCount: 1 },
+    { name: 'galleryFiles', maxCount: 20 },
+  ]),
+  async (req, res, next) => {
+    try {
+      const id = Number(req.params.id);
+      const { title, slug, body, publishedAt } = req.body;
+      const finalSlug = slug?.trim() ? slugify(slug) : slugify(title || '');
+
+      // ถ้ามีอัปโหลด cover ใหม่ ให้ตั้งค่า featuredImage
+      const coverFile = req.files?.featuredFile?.[0] || null;
+      const featuredImage = coverFile ? `/uploads/${coverFile.filename}` : undefined; // undefined = ไม่แตะฟิลด์
+
+      // ภาพแกลเลอรีใหม่ (ถ้ามี)
+      const newImages = (req.files?.galleryFiles || []).map((f, idx) => ({
+        url: `/uploads/${f.filename}`,
+        sortOrder: idx + 1,
+      }));
+
+      await prisma.portfolio.update({
+        where: { id },
+        data: {
+          title: title?.trim() || undefined,
+          slug: finalSlug || undefined,
+          body: body ?? undefined,
+          publishedAt: publishedAt ? new Date(publishedAt) : undefined,
+          ...(featuredImage ? { featuredImage } : {}),
+          images: newImages.length ? { create: newImages } : undefined,
+        },
+      });
+
+      await addLog('portfolio', 'updated', id, `แก้ไขผลงาน #${id}`);
+      res.redirect('/admin/portfolio');
+    } catch (e) {
+      if (String(e).includes('Unique') || String(e?.message || '').includes('Unique')) {
+        return res.status(400).send('Slug ซ้ำกับผลงานอื่น');
+      }
+      next(e);
+    }
+  }
+);
+
 app.get('/admin/portfolio/:id/edit', async (req, res, next) => {
   try {
     const id = Number(req.params.id);
@@ -1434,36 +1521,7 @@ app.get('/admin/portfolio/:id/edit', async (req, res, next) => {
     res.render('admin/portfolio/edit', { post, errors: null });
   } catch (e) { next(e); }
 });
-// อัปเดตข้อมูลหลัก + เพิ่มรูปใหม่
-app.post('/admin/portfolio/:id', upload.array('images', 12), async (req, res, next) => {
-  try {
-    const id = Number(req.params.id);
-    const { title, slug, body, publishedAt } = req.body;
-    const finalSlug = slug?.trim() ? slugify(slug) : slugify(title || '');
-    const newImages = (req.files || []).map((f, idx) => ({ url: `/uploads/${f.filename}`, sortOrder: Date.now() + idx }));
 
-    await prisma.$transaction(async (tx) => {
-      await tx.portfolio.update({
-        where: { id },
-        data: {
-          title: title?.trim() || undefined,
-          slug: finalSlug || undefined,
-          body: body ?? undefined,
-          publishedAt: publishedAt ? new Date(publishedAt) : undefined,
-          images: newImages.length ? { create: newImages } : undefined,
-        },
-      });
-    });
-
-    await addLog('portfolio', 'updated', id, `แก้ไขผลงาน #${id}`);
-    res.redirect('/admin/portfolio');
-  } catch (e) {
-    if (String(e).includes('Unique') || String(e?.message || '').includes('Unique')) {
-      return res.status(400).send('Slug ซ้ำกับผลงานอื่น');
-    }
-    next(e);
-  }
-});
 app.post('/admin/portfolio/:id/images/:imageId/delete', async (req, res, next) => {
   try {
     const id = Number(req.params.id);

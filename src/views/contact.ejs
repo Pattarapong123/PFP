@@ -20,59 +20,93 @@
       </div>
     </section>
 
-    <!-- 2-Column: Contact Info + LINE QR -->
+    <!-- 2-Column: Contact Info + LINE + MAP -->
     <section class="grid" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr));align-items:start;gap:20px;">
-      <!-- Contact Info Card -->
-      <div class="card" style="display:flex;flex-direction:column;gap:14px;">
-        <div style="display:flex;align-items:center;gap:12px;">
-          <img src="/images/logo3.jpg" alt="PFP ENGINEERING" style="height:64px;width:auto;object-fit:contain;border-radius:10px;">
-          <div>
-            <h2 style="margin:0 0 4px;font-size:20px;">PFP ENGINEERING</h2>
-            <span class="badge">พร้อมให้คำปรึกษา</span>
+      <!-- LEFT COLUMN: Contact card + Address card (stack) -->
+      <div style="display:grid;gap:20px;">
+        <!-- Contact Info Card -->
+        <div class="card" style="display:flex;flex-direction:column;gap:14px;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <img src="/images/logo3.jpg" alt="PFP ENGINEERING" style="height:64px;width:auto;object-fit:contain;border-radius:10px;">
+            <div>
+              <h2 style="margin:0 0 4px;font-size:20px;">PFP ENGINEERING</h2>
+              <span class="badge">พร้อมให้คำปรึกษา</span>
+            </div>
+          </div>
+
+          <div style="display:grid;gap:10px;margin-top:8px;">
+            <!-- Emails -->
+            <a href="mailto:pfp.service01@gmail.com" class="card" style="display:flex;align-items:center;gap:12px;padding:10px 12px;text-decoration:none;">
+              <div style="font-weight:700;">E-mail</div>
+              <div style="color:var(--muted);">pfp.service01@gmail.com</div>
+            </a>
+
+            <a href="mailto:Pmeekit.pfp@gmail.com" class="card" style="display:flex;align-items:center;gap:12px;padding:10px 12px;text-decoration:none;">
+              <div style="font-weight:700;">E-mail</div>
+              <div style="color:var(--muted);">Pmeekit.pfp@gmail.com</div>
+            </a>
+
+            <!-- Phones -->
+            <a href="tel:0991351328" class="card" style="display:flex;align-items:center;gap:12px;padding:10px 12px;text-decoration:none;">
+              <div style="font-weight:700;">โทร</div>
+              <div style="color:var(--muted);">099-135-1328</div>
+            </a>
+            <a href="tel:0875362224" class="card" style="display:flex;align-items:center;gap:12px;padding:10px 12px;text-decoration:none;">
+              <div style="font-weight:700;">โทร</div>
+              <div style="color:var(--muted);">087-536-2224</div>
+            </a>
+            <a href="tel:0832931396" class="card" style="display:flex;align-items:center;gap:12px;padding:10px 12px;text-decoration:none;">
+              <div style="font-weight:700;">โทร</div>
+              <div style="color:var(--muted);">083-293-1396</div>
+            </a>
+          </div>
+
+          <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:4px;">
+            <a href="mailto:pfp.service01@gmail.com" class="btn">ส่งอีเมลหาเรา</a>
+            <a href="tel:0991351328" class="btn" style="background:transparent;color:var(--primary);border:1px solid var(--primary);">โทรเลย</a>
           </div>
         </div>
 
-        <div style="display:grid;gap:10px;margin-top:8px;">
-          <!-- Emails -->
-          <a href="mailto:pfp.service01@gmail.com" class="card" style="display:flex;align-items:center;gap:12px;padding:10px 12px;text-decoration:none;">
-            <div style="font-weight:700;">E-mail</div>
-            <div style="color:var(--muted);">pfp.service01@gmail.com</div>
-          </a>
-
-          <a href="mailto:Pmeekit.pfp@gmail.com" class="card" style="display:flex;align-items:center;gap:12px;padding:10px 12px;text-decoration:none;">
-            <div style="font-weight:700;">E-mail</div>
-            <div style="color:var(--muted);">Pmeekit.pfp@gmail.com</div>
-          </a>
-
-          <!-- Phones -->
-          <a href="tel:0991351328" class="card" style="display:flex;align-items:center;gap:12px;padding:10px 12px;text-decoration:none;">
-            <div style="font-weight:700;">โทร</div>
-            <div style="color:var(--muted);">099-135-1328</div>
-          </a>
-          <a href="tel:0875362224" class="card" style="display:flex;align-items:center;gap:12px;padding:10px 12px;text-decoration:none;">
-            <div style="font-weight:700;">โทร</div>
-            <div style="color:var(--muted);">087-536-2224</div>
-          </a>
-          <a href="tel:0832931396" class="card" style="display:flex;align-items:center;gap:12px;padding:10px 12px;text-decoration:none;">
-            <div style="font-weight:700;">โทร</div>
-            <div style="color:var(--muted);">083-293-1396</div>
-          </a>
-        </div>
-
-        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:4px;">
-          <a href="mailto:pfp.service01@gmail.com" class="btn">ส่งอีเมลหาเรา</a>
-          <a href="tel:0991351328" class="btn" style="background:transparent;color:var(--primary);border:1px solid var(--primary);">โทรเลย</a>
+        <!-- NEW: Address / Hours Card (separate) -->
+        <div class="card" style="display:grid;gap:8px;">
+          <h2 style="margin:0;font-size:18px;">ข้อมูลบริษัท / ที่อยู่</h2>
+          <div style="font-weight:900;">บริษัท พี.เอฟ.พี เอ็นจิเนียริ่ง แอนด์ เซอร์วิส จำกัด (สำนักงานใหญ่)</div>
+          <div style="color:var(--muted);line-height:1.55;">
+            เลขที่ 80/56 พฤกษาวิลเลจ39 หมู่ที่ 8 ถนนลำลูกกา ตำบลลาดสวาย<br>
+            อำเภอลำลูกกา จังหวัดปทุมธานี 12150
+          </div>
+          <div><strong>เวลาทำการ:</strong> จันทร์–ศุกร์ 09:00–18:00 น.</div>
         </div>
       </div>
 
-      <!-- LINE QR Card -->
-      <div class="card" style="display:grid;gap:12px;justify-items:center;text-align:center;">
-        <h2 style="margin:0;font-size:20px;">แสกนเพื่อแชท (LINE)</h2>
-        <img src="/images/line.jpg" alt="LINE QR Code"
-             style="width:min(320px,100%);aspect-ratio:1/1;object-fit:contain;border-radius:12px;border:1px solid var(--border);box-shadow:var(--shadow);background:var(--panel);">
-        <p style="color:var(--muted);margin:0;">
-          เปิดกล้องหรือแอป LINE แล้วสแกนเพื่อคุยกับเราได้ทันที
-        </p>
+      <!-- Right Column: LINE + MAP -->
+      <div style="display:grid;gap:20px;">
+        <!-- LINE QR Card -->
+        <div class="card" style="display:grid;gap:12px;justify-items:center;text-align:center;">
+          <h2 style="margin:0;font-size:20px;">แสกนเพื่อแชท (LINE)</h2>
+          <img src="/images/line.jpg" alt="LINE QR Code"
+               style="width:min(320px,100%);aspect-ratio:1/1;object-fit:contain;border-radius:12px;border:1px solid var(--border);box-shadow:var(--shadow);background:var(--panel);">
+          <p style="color:var(--muted);margin:0;">
+            เปิดกล้องหรือแอป LINE แล้วสแกนเพื่อคุยกับเราได้ทันที
+          </p>
+        </div>
+
+        <!-- Map Card (updated to Embed place) -->
+        <div class="card" style="display:grid;gap:12px;justify-items:center;text-align:center;">
+          <h2 style="margin:0;font-size:20px;">แผนที่บริษัท</h2>
+          <iframe
+            title="Google Map - PFP Engineering"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d98905.62400020653!2d100.66610617465064!3d13.939268490059947!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x311d7d1b129b7937%3A0x3487c837f7f9bf57!2z4Lia4Lij4Li04Lip4Lix4LiXIOC4nuC4tS7guYDguK3guJ8u4Lie4Li1IOC5gOC4reC5h-C4meC4iOC4tOC5gOC4meC4teC4ouC4o-C4tOC5iOC4hyDguYHguK3guJnguJTguYwg4LmA4LiL4Lit4Lij4LmM4Lin4Li04LiqIOC4iOC4s-C4geC4seC4lA!5e1!3m2!1sth!2sth!4v1759301533678!5m2!1sth!2sth"
+            style="width:100%;height:320px;border:0;border-radius:12px;"
+            allowfullscreen=""
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade">
+          </iframe>
+          <a class="btn btn--outline" target="_blank" rel="noopener"
+             href="https://www.google.com/maps/place/%E0%B8%9A%E0%B8%A3%E0%B8%B4%E0%B8%A9%E0%B8%B1%E0%B8%97+%E0%B8%9E%E0%B8%B5.%E0%B9%80%E0%B8%AD%E0%B8%9F.%E0%B8%9E%E0%B8%B5+%E0%B9%80%E0%B8%AD%E0%B9%87%E0%B8%99%E0%B8%88%E0%B8%B4%E0%B9%80%E0%B8%99%E0%B8%B5%E0%B8%A2%E0%B8%A3%E0%B8%B4%E0%B9%88%E0%B8%87+%E0%B9%81%E0%B8%AD%E0%B8%99%E0%B8%94%E0%B9%8C+%E0%B9%80%E0%B8%8B%E0%B8%AD%E0%B8%A3%E0%B9%8C%E0%B8%A7%E0%B8%B4%E0%B8%AA+%E0%B8%88%E0%B8%B3%E0%B8%81%E0%B8%B1%E0%B8%94/@13.9327492,100.6670952,17z/data=!4m6!3m5!1s0x311d7d1b129b7937:0x3487c837f7f9bf57!8m2!3d13.9327492!4d100.6670952!16s%2Fg%2F11tdqhynw0">
+            เปิดด้วย Google Maps
+          </a>
+        </div>
       </div>
     </section>
 
@@ -84,7 +118,6 @@
           เวลาทำการ: จันทร์–ศุกร์ 09:00–18:00 น. (นอกเวลาให้ฝากข้อความไว้ได้เสมอ)
         </p>
       </div>
-    </section>
     </section>
   </main>
 

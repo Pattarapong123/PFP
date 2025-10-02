@@ -132,8 +132,8 @@
           <% (posts || []).forEach(p => { %>
             <tr>
               <td>
-                <% if (p.featuredImageUrl) { %>
-                  <img class="thumb" src="<%= p.featuredImageUrl %>" alt="ภาพ <%= p.title %>">
+                <% if (p.featuredImage) { %>
+                  <img class="thumb" src="<%= p.featuredImage %>" alt="ภาพ <%= p.title %>">
                 <% } else { %>
                   <div class="admin-skeleton" style="width:64px;height:48px;border-radius:10px;margin-inline:auto;"></div>
                 <% } %>

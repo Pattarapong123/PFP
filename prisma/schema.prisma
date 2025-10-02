@@ -185,7 +185,7 @@ model Portfolio {
   body             String            @default("")
   summary          String            @default("")
   content          String            @default("")
-  featuredImageUrl String?
+  featuredImage    String?
   publishedAt      DateTime?
   tags             PortfolioTagMap[]
   images           PortfolioImage[]

@@ -44,10 +44,6 @@
     .pc-meta{ color:var(--muted); font-size:13px; }
     .price-row{ display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:10px 0 6px; }
     .price-lg{ font-size:28px; font-weight:900; letter-spacing:.3px; }
-    .pill{
-      display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px;
-      border:1px solid var(--border); background: var(--panel); font-size:12px; font-weight:800; white-space:nowrap;
-    }
 
     /* ====== Stock ====== */
     .stock-row{ display:flex; align-items:center; gap:10px; color:var(--muted); }
@@ -67,15 +63,13 @@
     }
     .detail-info-card .card-title{ font-weight:900; margin-bottom:6px; }
 
-    /* ====== Actions / Qty (ปรับเฉพาะส่วนนี้ให้เด่นขึ้น) ====== */
+    /* ====== Actions / Qty ====== */
     .primary-actions{ margin-top:12px; }
-
     .qty-control{
       display:inline-flex; align-items:center; gap:10px;
       padding:8px; border:1px solid var(--border); border-radius:14px;
       background: var(--panel); box-shadow: var(--shadow);
     }
-
     .qty-btn{
       width:44px; height:44px; display:grid; place-items:center;
       font-size:22px; font-weight:900; line-height:1;
@@ -88,14 +82,11 @@
     .qty-btn:hover{ background: var(--primary-100, #e0e7ff); }
     .qty-btn:active{ transform: translateY(1px); }
     .qty-btn:focus-visible{ outline:3px solid color-mix(in oklab, var(--primary) 45%, transparent); outline-offset:2px; }
-
     .qty-control input{
       width:96px; height:44px; text-align:center; font-weight:900; font-size:18px;
       padding:0 12px; border:1px solid var(--border); border-radius:12px; background:#fff;
       font-variant-numeric: tabular-nums;
     }
-
-    /* ซ่อนลูกศรของ number เพื่อความเรียบ */
     input[type="number"]::-webkit-outer-spin-button,
     input[type="number"]::-webkit-inner-spin-button{ -webkit-appearance: none; margin: 0; }
     input[type="number"]{ -moz-appearance: textfield; }
@@ -104,7 +95,6 @@
       display:inline-flex; align-items:center; gap:8px; border-radius:12px; padding:12px 16px; border:1px solid var(--border); cursor:pointer;
       font-weight:800;
     }
-    .btn--neutral{ background:#fff; }
     .btn--primary{ background: var(--primary, #2563eb); color:#fff; border-color: color-mix(in oklab, var(--primary) 70%, #0000); }
     .btn[disabled]{ opacity:.5; cursor:not-allowed; }
 
@@ -145,7 +135,6 @@
       <!-- Media / Gallery -->
       <div class="pd-media">
         <img id="pd-hero" class="pd-hero" src="<%= heroSrc %>" alt="<%= product.name %>">
-
         <div class="pd-thumbs" id="pd-thumbs">
           <% if (!imgs.length) { %>
             <img class="pd-thumb is-active" src="/images/placeholder.png" alt="placeholder">
@@ -177,7 +166,7 @@
             <%= Number(product.price).toLocaleString('th-TH', { minimumFractionDigits: 2 }) %> บาท
           </div>
           <% if (product && product.sku) { %>
-            <span class="pill">SKU: <%= product.sku %></span>
+            <span class="stock-pill">SKU: <%= product.sku %></span>
           <% } %>
         </div>
 
@@ -202,12 +191,11 @@
 
         <!-- ซื้อ -->
         <div class="primary-actions">
-          <form id="add-to-cart-form" method="post" action="/cart/add" onsubmit="return guardStock(event)">
+          <form id="add-to-cart-form" method="post" action="/cart/add">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <input type="hidden" name="productId" value="<%= product.id %>">
 
             <div class="qty-control">
-              <!-- แค่เพิ่มคลาส .qty-btn เพื่อสไตล์ให้เด่นขึ้น -->
               <button type="button" class="qty-btn" aria-label="ลดจำนวน" onclick="chg(-1)">−</button>
               <input id="qty" name="qty" type="number" min="1" value="1" inputmode="numeric" pattern="[0-9]*" aria-live="polite">
               <button type="button" class="qty-btn" aria-label="เพิ่มจำนวน" onclick="chg(1)">＋</button>
@@ -250,11 +238,11 @@
       v = Math.max(1, Math.min(v, maxQty || 1));
       el.value = v;
     }
-    function guardStock(e){
-      if (maxQty <= 0) { e.preventDefault(); return false; }
+    function guardQty(){
+      if (maxQty <= 0) return false;
       const el = document.getElementById('qty');
       let v = parseInt(el.value || '1', 10);
-      if (v > maxQty) { el.value = maxQty; }
+      if (v > maxQty) { el.value = maxQty; v = maxQty; }
       return v > 0 && v <= maxQty;
     }
 
@@ -269,21 +257,49 @@
       window.__toastTimer = setTimeout(()=> box.classList.remove('show'), 2600);
     }
 
+    // ----- Add-to-cart (AJAX first, fallback to normal submit) -----
     (function(){
       const form = document.getElementById('add-to-cart-form');
       if(!form) return;
-      form.addEventListener('submit', function(ev){
-        if(!guardStock(ev)) return;
-        sessionStorage.setItem('toastMsg', '✅ เพิ่มสินค้าลงตะกร้าแล้ว');
-      });
-    })();
 
-    (function(){
-      const msg = sessionStorage.getItem('toastMsg');
-      if(msg){
-        sessionStorage.removeItem('toastMsg');
-        window.requestAnimationFrame(() => showToast(msg));
-      }
+      form.addEventListener('submit', async function(ev){
+        // ถ้าสต๊อกไม่พอ ให้หยุดเลย
+        if (!guardQty()) { ev.preventDefault(); return; }
+
+        // พยายามยิง AJAX ก่อน
+        ev.preventDefault();
+        try {
+          const productId = Number(form.querySelector('input[name="productId"]').value);
+          const qty = Number(document.getElementById('qty').value || 1);
+
+          const res = await fetch('/cart/add', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'              // 👈 บอกเซิร์ฟเวอร์ให้คืน JSON
+            },
+            body: JSON.stringify({ productId, qty })
+          });
+
+          if (res.ok) {
+            const data = await res.json().catch(()=> ({}));
+            if (data && data.ok) {
+              // อัปเดต badge ตะกร้า
+              const badge = document.getElementById('cartCount');
+              if (badge && typeof data.cartCount !== 'undefined') {
+                badge.textContent = data.cartCount;
+              }
+              showToast('✅ เพิ่มสินค้าลงตะกร้าแล้ว');
+              return; // จบแบบ AJAX
+            }
+          }
+          // ถ้าไม่ได้ JSON ok ให้ fallback ส่งฟอร์มปกติ
+          form.submit();
+        } catch (err) {
+          // เผื่อหลุด error ก็ fallback
+          form.submit();
+        }
+      });
     })();
   </script>
 

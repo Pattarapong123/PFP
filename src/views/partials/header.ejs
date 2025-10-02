@@ -1,91 +1,139 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- 🔹 Meta SEO -->
-  <meta name="description" content="เว็บไซต์บริษัท PFP แสดงผลงาน ข้อมูลสินค้า และบริการ (Demo)">
-  <meta name="keywords" content="PFP, บริษัท, สินค้า, portfolio, demo, ผลงาน">
-  <meta name="author" content="PFP Company">
-
-  <!-- 🔹 Open Graph (เวลาแชร์ลิงก์บนโซเชียล) -->
-  <meta property="og:title" content="PFP Company" />
-  <meta property="og:description" content="เว็บไซต์บริษัท PFP แสดงผลงานและสินค้า (Demo)">
-  <meta property="og:image" content="https://pattarapong123.github.io/PFP/images/preview.jpg" />
-  <meta property="og:url" content="https://pattarapong123.github.io/PFP/" />
-  <meta property="og:type" content="website" />
-
-  <!-- 🔹 Dynamic title -->
-  <title><%= title || "PFP Company" %></title>
-
-  <!-- ✅ CSS ของ Header -->
+<header class="navbar" role="banner">
   <style>
-    .site-header {
-      display:flex; align-items:center; justify-content:space-between;
-      min-height:64px; padding-block:8px; gap:20px;
+    /* ====== Layout: ซ้าย(โลโก้) | กลาง(เมนู) | ขวา(actions) ====== */
+    .site-header{
+      display:grid;
+      grid-template-columns: minmax(100px,auto) 1fr auto; /* ขยายคอลัมน์โลโก้ */
+      align-items:center;
+      min-height:68px;                /* ↑ สูงขึ้นรองรับโลโก้ใหญ่ */
+      padding:4px 20px;
+      gap:16px;
     }
-    .brand{ display:flex; align-items:center; gap:10px; text-decoration:none; }
-    .brand-logo{ width:44px; height:44px; object-fit:cover; border-radius:8px; }
-    .nav-left{ display:flex; align-items:center; gap:24px; }
 
-    .main-nav{ display:flex; align-items:center; gap:18px; }
+    /* ----- โลโก้ ----- */
+    .brand{
+      display:flex; align-items:center; justify-self:start;
+      text-decoration:none; flex:0 0 auto; min-width:100px;
+    }
+    .brand-logo{
+      height: 56px;                   /* ↑ ขยายโลโก้ */
+      width: auto;                    /* รักษาสัดส่วน */
+      object-fit: contain;
+      display:block;
+      background: transparent;
+      border-radius: 0;               /* เอามุมโค้งออกให้โลโก้เต็ม */
+    }
+    /* ทำให้ใหญ่ขึ้นอีกนิดบนจอใหญ่ */
+    @media (min-width: 1200px){
+      .brand-logo{ height: 60px; }
+      .site-header{ min-height: 72px; }
+    }
+    /* จอเล็กลงก็ยังใหญ่กว่าของเดิม */
+    @media (max-width: 900px){
+      .brand-logo{ height: 56px; }
+    }
+
+    /* ----- “ลบพื้นหลังขาว” แบบ CSS (เหมาะกับ JPG ขาว) -----
+       ใช้ mix-blend-mode: multiply เพื่อละลายสีขาวให้หาย
+       หมายเหตุ: วิธีนี้เป็นทริคภาพรวม ไม่เนียนเท่า PNG โปร่งใสจริง */
+    .brand-logo--blend {
+      mix-blend-mode: multiply;
+      background: transparent;
+      /* ช่วยให้ขอบดูคมขึ้นเล็กน้อย */
+      filter: contrast(1.1) brightness(1.03);
+    }
+    /* ใน dark mode ให้เบรกไม่ให้ภาพมืดเกินไป */
+    :root[data-theme="dark"] .brand-logo--blend{
+      mix-blend-mode: screen;
+      filter: contrast(1.05) brightness(1.06);
+    }
+
+    /* ----- เมนู ----- */
+    .main-nav{
+      display:flex; align-items:center; gap:24px;
+      justify-self:start;
+      margin-left:12px;
+      min-width:0;
+    }
     .main-nav a{
       text-decoration:none; padding:8px 10px; border-radius:8px; font-weight:600;
-      color: var(--muted);
+      color: var(--muted); white-space:nowrap;
       transition: background .2s ease, color .2s ease;
     }
-    .main-nav a:hover{ color: var(--text); background: color-mix(in oklab, var(--primary) 10%, transparent); }
+    .main-nav a:hover{
+      color: var(--text);
+      background: color-mix(in oklab, var(--primary) 10%, transparent);
+    }
     .main-nav a.active{
       background: color-mix(in oklab, var(--primary) 14%, transparent);
       color: var(--primary);
+      box-shadow: inset 0 -3px 0 color-mix(in oklab, var(--primary) 50%, transparent);
     }
 
-    .header-actions{ display:flex; align-items:center; gap:12px; margin-left:auto; }
-    .cart-link{ text-decoration:none; padding:6px 12px; border-radius:20px; background: rgba(0,0,0,.05); }
-    .cart-badge{ background:#ff3b30; color:#fff; border-radius:999px; padding:2px 6px; font-size:12px; margin-left:4px; }
+    /* ----- Actions ขวา ----- */
+    .header-actions{
+      display:flex; align-items:center; gap:14px;
+      justify-self:end; white-space:nowrap; flex:0 0 auto;
+    }
+    .cart-link{
+      text-decoration:none; padding:6px 12px; border-radius:20px;
+      background: rgba(0,0,0,.05);
+    }
+    .cart-badge{
+      background:#ff3b30; color:#fff; border-radius:999px;
+      padding:2px 6px; font-size:12px; margin-left:4px;
+    }
 
     .theme-toggle{
       display:inline-flex; align-items:center; justify-content:center;
       height:36px; min-width:36px; padding:0 10px; border-radius:10px;
-      border:1px solid var(--border); background:var(--panel); color:inherit;
-      font-weight:800; cursor:pointer; transition:.2s;
-      order:99;
+      border:1px solid var(--border); background:var(--panel); cursor:pointer; transition:.2s;
     }
     .theme-toggle:hover{ background: rgba(11,99,246,.06); border-color: rgba(11,99,246,.35); }
     .theme-toggle:active{ transform: translateY(1px); }
     .theme-toggle .icon{ font-size:16px; line-height:1; }
 
+    /* ===== Navbar fixed & bg ทึบ ===== */
     .navbar{
-      background: rgba(255,255,255,.85);
-      backdrop-filter: blur(8px);
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1200;
+      background: #ffffff;
       border-bottom:1px solid var(--border);
     }
-    :root[data-theme="dark"] .navbar{ background: rgba(21,25,34,.7); }
+    :root[data-theme="dark"] .navbar{ background: #1e293b; }
+
+    /* Responsive tweaks */
+    @media (max-width: 1200px){ .header-actions .greet{ display:none; } }
+    @media (max-width: 900px){ .main-nav{ gap:16px; font-size:14px; } }
   </style>
-</head>
 
-<body>
-<header class="navbar" role="banner">
   <div class="container site-header">
-    <!-- ซ้าย: โลโก้ + เมนู -->
-    <div class="nav-left">
-      <a class="brand" href="/" aria-label="หน้าแรก PFP">
-        <img src="/images/logo2.jpg" class="brand-logo" alt="PFP Logo">
-      </a>
-      <nav class="main-nav" role="navigation" aria-label="เมนูหลัก">
-        <a href="/" class="<%= path==='/' ? 'active' : '' %>">หน้าแรก</a>
-        <a href="/products" class="<%= (path||'').startsWith('/products') ? 'active' : '' %>">สินค้า</a>
-        <a href="/portfolio" class="<%= (path||'').startsWith('/portfolio') ? 'active' : '' %>">ผลงาน</a>
-        <a href="/about" class="<%= path==='/about' ? 'active' : '' %>">เกี่ยวกับเรา</a>
-        <a href="/contact" class="<%= path==='/contact' ? 'active' : '' %>">ติดต่อเรา</a>
-      </nav>
-    </div>
+    <!-- โลโก้ -->
+    <a class="brand" href="/" aria-label="หน้าแรก PFP">
+      <!-- ถ้ามีไฟล์โปร่งใส ให้สลับ src เป็น PNG/SVG โปร่งใสได้เลย -->
+      <!-- ตั้งคลาส brand-logo--blend ไว้เป็นแผนสำรอง “ลบพื้นหลังขาว” ด้วย CSS -->
+      <img
+        src="/images/logo2.jpg"
+        alt="PFP Logo"
+        class="brand-logo brand-logo--blend"
+        onerror="this.onerror=null;this.src='/images/logo3.jpg';"
+      >
+    </a>
 
-    <!-- ขวา: ผู้ใช้ + ตะกร้า + สลับธีม -->
+    <!-- เมนู -->
+    <nav class="main-nav" role="navigation" aria-label="เมนูหลัก">
+      <a href="/"           class="<%= (path||'')==='/' ? 'active' : '' %>">หน้าแรก</a>
+      <a href="/products"   class="<%= (path||'').startsWith('/products')  ? 'active' : '' %>">สินค้า</a>
+      <a href="/portfolio"  class="<%= (path||'').startsWith('/portfolio') ? 'active' : '' %>">ผลงาน</a>
+      <a href="/about"      class="<%= (path||'')==='/about'    ? 'active' : '' %>">เกี่ยวกับเรา</a>
+      <a href="/contact"    class="<%= (path||'')==='/contact'  ? 'active' : '' %>">ติดต่อเรา</a>
+    </nav>
+
+    <!-- Actions -->
     <div class="header-actions">
-      <% if (user) { %>
-        <span>สวัสดี, <%= user.name || user.email %></span>
+      <% if (typeof user !== 'undefined' && user) { %>
+        <span class="greet">สวัสดี, <%= user.name || user.email %></span>
         <a href="/orders/mine" class="<%= (path||'').startsWith('/orders') ? 'active' : '' %>">ออเดอร์ของฉัน</a>
         <form method="post" action="/auth/logout" style="margin:0;">
           <button class="btn btn--outline btn--sm">ออกจากระบบ</button>
@@ -96,7 +144,7 @@
 
       <a href="/cart"
          class="cart-link <%= (path||'').startsWith('/cart') || (path||'').startsWith('/checkout') ? 'active' : '' %>">
-        ตะกร้า <span class="cart-badge" id="cartCount"><%= cartCount %></span>
+        ตะกร้า <span class="cart-badge" id="cartCount"><%= typeof cartCount !== 'undefined' ? cartCount : 0 %></span>
       </a>
 
       <button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle theme">
@@ -105,34 +153,32 @@
     </div>
   </div>
 
-  <!-- Theme toggle logic -->
+  <!-- Theme toggle -->
   <script>
     (function(){
-      const THEME_KEY = 'pfp.theme';
-      const html = document.documentElement;
-      const btn  = document.getElementById('themeToggle');
-      const icon = document.getElementById('themeIcon');
+      const THEME_KEY='pfp.theme';
+      const html=document.documentElement;
+      const btn=document.getElementById('themeToggle');
+      const icon=document.getElementById('themeIcon');
 
-      function syncIcon(){
-        const isDark = html.getAttribute('data-theme') === 'dark';
-        icon.textContent = isDark ? '☀️' : '🌙';
-        btn.setAttribute('aria-pressed', String(isDark));
-      }
+      function sync(){ icon.textContent = html.getAttribute('data-theme')==='dark' ? '☀️' : '🌙'; }
+
       (function init(){
-        const saved = localStorage.getItem(THEME_KEY);
-        if (saved === 'light' || saved === 'dark') {
+        const saved=localStorage.getItem(THEME_KEY);
+        if(saved==='light'||saved==='dark'){
           html.setAttribute('data-theme', saved);
-        } else {
-          const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
+        }else{
+          const prefersDark=window.matchMedia?.('(prefers-color-scheme: dark)').matches;
           html.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
         }
-        syncIcon();
+        sync();
       })();
-      btn.addEventListener('click', () => {
-        const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+
+      btn && btn.addEventListener('click', ()=>{
+        const next = html.getAttribute('data-theme')==='dark' ? 'light' : 'dark';
         html.setAttribute('data-theme', next);
         localStorage.setItem(THEME_KEY, next);
-        syncIcon();
+        sync();
       });
     })();
   </script>
